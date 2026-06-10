@@ -36,8 +36,6 @@
   .header { margin-bottom: 2rem; }
   .header h1 { font-size: 22px; font-weight: 600; color: var(--gray-900); }
   .header p { font-size: 14px; color: var(--gray-500); margin-top: 4px; }
-
-  /* Step indicator */
   .steps { display: flex; align-items: center; margin-bottom: 2rem; }
   .step { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
   .step-dot { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; border: 1.5px solid var(--gray-300); background: white; color: var(--gray-400); }
@@ -47,30 +45,20 @@
   .step.active .step-label { color: var(--info); }
   .step.done .step-label { color: var(--success); }
   .step-line { flex: 1; height: 1px; background: var(--gray-200); margin-bottom: 18px; }
-
-  /* Cards */
   .card { background: white; border: 1px solid var(--gray-200); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1rem; }
   .card h3 { font-size: 14px; font-weight: 600; color: var(--gray-800); margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
-
-  /* Form fields */
   .field { margin-bottom: 14px; }
   .field label { display: block; font-size: 12px; font-weight: 500; color: var(--gray-600); margin-bottom: 5px; }
   .field input, .field select { width: 100%; height: 38px; padding: 0 12px; border: 1px solid var(--gray-300); border-radius: var(--radius); font-size: 13px; color: var(--gray-900); background: white; outline: none; transition: border-color 0.15s; }
   .field input:focus, .field select:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(108,63,197,0.1); }
   .field .hint { font-size: 11px; color: var(--gray-400); margin-top: 4px; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-  /* Password field */
   .pw-wrap { position: relative; }
-  .pw-wrap input { padding-right: 40px; }
+  .pw-wrap input { padding-right: 50px; }
   .pw-toggle { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--gray-400); font-size: 13px; padding: 4px; }
-
-  /* Color picker */
   .color-row { display: flex; align-items: center; gap: 8px; }
   .color-row input[type=color] { width: 38px; height: 38px; padding: 2px 3px; border: 1px solid var(--gray-300); border-radius: var(--radius); cursor: pointer; background: white; }
   .color-row input[type=text] { flex: 1; }
-
-  /* Toggle */
   .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--gray-100); }
   .toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
   .toggle-row span { font-size: 13px; color: var(--gray-700); }
@@ -80,51 +68,35 @@
   .toggle input:checked ~ .toggle-track { background: var(--purple); }
   .toggle-thumb { position: absolute; width: 16px; height: 16px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.2s; pointer-events: none; }
   .toggle input:checked ~ .toggle-thumb { transform: translateX(18px); }
-
-  /* Buttons */
   .btn-row { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1.5rem; }
   button { font-family: inherit; cursor: pointer; border-radius: var(--radius); font-size: 13px; font-weight: 500; padding: 9px 18px; border: 1px solid var(--gray-300); background: white; color: var(--gray-700); transition: background 0.15s; }
   button:hover { background: var(--gray-50); }
   button:disabled { opacity: 0.5; cursor: not-allowed; }
   .btn-primary { background: var(--purple); color: white; border-color: var(--purple); }
   .btn-primary:hover { background: var(--purple-light); border-color: var(--purple-light); }
-
-  /* Status */
   .status { padding: 10px 14px; border-radius: var(--radius); font-size: 13px; margin-bottom: 14px; display: none; }
   .status.info { display: block; background: var(--info-bg); color: var(--info); border: 1px solid var(--info-border); }
   .status.success { display: block; background: var(--success-bg); color: var(--success); border: 1px solid var(--success-border); }
   .status.error { display: block; background: var(--error-bg); color: var(--error); border: 1px solid var(--error-border); }
-
-  /* Progress */
   .progress-wrap { margin: 10px 0; display: none; }
   .progress-wrap.show { display: block; }
   .progress-bar-bg { height: 6px; background: var(--gray-200); border-radius: 3px; overflow: hidden; }
   .progress-bar-fill { height: 100%; background: var(--purple); border-radius: 3px; transition: width 0.4s; }
   .progress-label { font-size: 12px; color: var(--gray-500); margin-top: 5px; }
-
-  /* Preview */
   .preview-area { background: var(--gray-50); border-radius: var(--radius); padding: 1.25rem; margin-top: 1rem; display: flex; align-items: center; gap: 12px; }
   .fab-preview { display: inline-flex; align-items: center; gap: 10px; padding: 10px 18px 10px 10px; border-radius: 50px; cursor: default; }
   .fab-icon { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
   .fab-icon svg { width: 18px; height: 18px; fill: white; }
   .fab-text-label { font-size: 13px; font-weight: 700; color: #1a1a1a; }
   .fab-text-tag { font-size: 11px; color: #666; max-width: 160px; }
-
-  /* Script box */
   .script-wrap { position: relative; margin-top: 8px; }
   .script-box { background: var(--gray-900); color: #e2e8f0; border-radius: var(--radius); padding: 1rem; font-family: 'Courier New', monospace; font-size: 12px; white-space: pre-wrap; word-break: break-all; line-height: 1.6; }
   .copy-btn { position: absolute; top: 8px; right: 8px; font-size: 11px; padding: 4px 10px; background: rgba(255,255,255,0.1); color: #e2e8f0; border-color: rgba(255,255,255,0.2); border-radius: 6px; }
   .copy-btn:hover { background: rgba(255,255,255,0.2); }
-
-  /* Deploy summary */
   .summary-row { display: flex; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--gray-100); font-size: 13px; }
   .summary-row:last-child { border-bottom: none; }
   .summary-row .key { color: var(--gray-500); min-width: 130px; flex-shrink: 0; }
   .summary-row .val { color: var(--gray-800); font-weight: 500; }
-
-  /* Cloudflare fields */
-  .cf-section { background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: var(--radius); padding: 1rem; margin-top: 1rem; }
-  .cf-section h4 { font-size: 12px; font-weight: 600; color: var(--gray-600); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
 </style>
 </head>
 <body>
@@ -137,7 +109,6 @@
   <div class="steps">
     <div class="step active" id="s1"><div class="step-dot">1</div><div class="step-label">Auth</div></div>
     <div class="step-line"></div>
-    <div class="step active" id="s2" style="display:none"><div class="step-dot">2</div><div class="step-label">Details</div></div>
     <div class="step" id="s2v"><div class="step-dot">2</div><div class="step-label">Details</div></div>
     <div class="step-line"></div>
     <div class="step" id="s3v"><div class="step-dot">3</div><div class="step-label">Theme</div></div>
@@ -168,6 +139,11 @@
           <button class="pw-toggle" onclick="togglePw('cf-token','cf-eye')"><span id="cf-eye">Show</span></button>
         </div>
         <div class="hint">Needs Workers Scripts: Edit + Account Settings: Read.</div>
+      </div>
+      <div class="field">
+        <label>Cloudflare account ID</label>
+        <input type="text" id="cf-account-id" placeholder="e.g. 94a0cf8c128760b5039fe14b5cde5010" />
+        <div class="hint">Found in the Cloudflare dashboard right sidebar.</div>
       </div>
     </div>
     <div class="btn-row">
@@ -257,7 +233,7 @@
     <div class="card">
       <h3>Preview</h3>
       <div class="preview-area">
-        <div class="fab-preview" id="fab-preview" style="background:white; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+        <div class="fab-preview" style="background:white; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
           <div class="fab-icon" id="fab-icon" style="background: linear-gradient(135deg,#6C3FC5,#C026D3)">
             <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
           </div>
@@ -317,9 +293,8 @@ const GH_ORG = 'FindAndDriveSupport';
 const BACKEND_REPO = 'efficient-finance-widget';
 const TEMPLATE_REPO = 'e-fficient-ui';
 const BACKEND_FILE = 'workers/dealers/dealers.config.js';
-const CF_ACCOUNT_ID = '94a0cf8c128760b5039fe14b5cde5010';
 
-let ghToken = '', cfToken = '';
+let ghToken = '', cfToken = '', cfAccountId = '';
 
 function showStatus(msg, type) {
   const el = document.getElementById('statusMsg');
@@ -357,13 +332,14 @@ function goTo(step) {
 async function validateAuth() {
   const gh = document.getElementById('gh-token').value.trim();
   const cf = document.getElementById('cf-token').value.trim();
-  if (!gh || !cf) { showStatus('Please enter both tokens.', 'error'); return; }
-  showStatus('Validating tokens...', 'info');
+  const cfAcc = document.getElementById('cf-account-id').value.trim();
+  if (!gh || !cf || !cfAcc) { showStatus('Please enter all three credentials.', 'error'); return; }
+  showStatus('Validating GitHub token...', 'info');
   try {
     const res = await fetch('https://api.github.com/user', { headers: { Authorization: 'Bearer ' + gh, Accept: 'application/vnd.github+json' } });
     if (!res.ok) throw new Error('Invalid GitHub token');
     const user = await res.json();
-    ghToken = gh; cfToken = cf;
+    ghToken = gh; cfToken = cf; cfAccountId = cfAcc;
     showStatus('Authenticated as ' + user.login, 'success');
     setTimeout(() => goTo(2), 800);
   } catch (e) { showStatus('GitHub token invalid: ' + e.message, 'error'); }
@@ -436,15 +412,23 @@ async function ghApi(path, method, body) {
   return data;
 }
 
-async function cfApi(path, method, body) {
-  const res = await fetch('https://api.cloudflare.com/client/v4' + path, {
-    method: method || 'GET',
-    headers: { Authorization: 'Bearer ' + cfToken, 'Content-Type': 'application/json' },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  const data = await res.json();
-  if (!data.success) throw new Error((data.errors && data.errors[0] && data.errors[0].message) || 'Cloudflare API error');
-  return data;
+async function encryptSecret(secret, b64Key) {
+  // Load libsodium for proper NaCl box encryption required by GitHub
+  if (!window._sodium) {
+    await new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/libsodium-wrappers@0.7.11/dist/modules/libsodium-wrappers.min.js';
+      s.onload = resolve; s.onerror = reject;
+      document.head.appendChild(s);
+    });
+    await window.sodium.ready;
+    window._sodium = window.sodium;
+  }
+  const sodium = window._sodium;
+  const keyBytes = sodium.from_base64(b64Key, sodium.base64_variants.ORIGINAL);
+  const secretBytes = sodium.from_string(secret);
+  const encrypted = sodium.crypto_box_seal(secretBytes, keyBytes);
+  return sodium.to_base64(encrypted, sodium.base64_variants.ORIGINAL);
 }
 
 async function startDeploy() {
@@ -473,15 +457,19 @@ async function startDeploy() {
     // 2. Create frontend repo from template
     setProgress(35, 'Creating frontend repo...');
     const repoName = 'e-fficient-ui-' + c.key;
-    await ghApi('/repos/' + GH_ORG + '/' + TEMPLATE_REPO + '/generate', 'POST', {
-      owner: GH_ORG,
-      name: repoName,
-      description: 'E-fficient Finance Widget — ' + c.name,
-      private: true,
-      include_all_branches: false,
-    });
+    try {
+      await ghApi('/repos/' + GH_ORG + '/' + TEMPLATE_REPO + '/generate', 'POST', {
+        owner: GH_ORG,
+        name: repoName,
+        description: 'E-fficient Finance Widget — ' + c.name,
+        private: true,
+        include_all_branches: false,
+      });
+    } catch(e) {
+      if (!e.message.includes('already exists')) throw e;
+      showStatus('Repo already exists — continuing with config...', 'info');
+    }
 
-    // Wait for repo to initialise
     setProgress(45, 'Waiting for repo to initialise...');
     await new Promise(r => setTimeout(r, 4000));
 
@@ -498,7 +486,7 @@ async function startDeploy() {
     });
 
     // 4. Commit wrangler.toml
-    setProgress(65, 'Setting up wrangler config...');
+    setProgress(62, 'Setting up wrangler config...');
     const wranglerContent = `name       = "e-fficient-ui-${c.key}"\nmain       = "dist/server/server.js"\ncompatibility_date = "2024-01-01"\ncompatibility_flags = ["nodejs_compat"]\nassets = { directory = "dist/client" }\n\n[vars]\nNODE_ENV = "production"\n`;
     const wranglerEncoded = btoa(unescape(encodeURIComponent(wranglerContent)));
     let wranglerSha;
@@ -510,7 +498,7 @@ async function startDeploy() {
     });
 
     // 5. Commit .env
-    setProgress(70, 'Setting environment variables...');
+    setProgress(68, 'Setting environment variables...');
     const envContent = `VITE_WORKER_URL=https://efficient-finance-widget.still-fire-1c3d.workers.dev\nVITE_DEFAULT_DEALER=${c.key}\n`;
     const envEncoded = btoa(unescape(encodeURIComponent(envContent)));
     let envSha;
@@ -522,7 +510,7 @@ async function startDeploy() {
     });
 
     // 6. Add GitHub Actions workflow
-    setProgress(78, 'Adding deploy workflow...');
+    setProgress(75, 'Adding deploy workflow...');
     const workflowContent = buildWorkflow(c.key);
     const workflowEncoded = btoa(unescape(encodeURIComponent(workflowContent)));
     let workflowSha;
@@ -533,25 +521,24 @@ async function startDeploy() {
       ...(workflowSha ? { sha: workflowSha } : {}),
     });
 
-    // 7. Add Cloudflare secrets to GitHub repo
-    setProgress(88, 'Adding Cloudflare secrets to repo...');
-    // Get repo public key for secret encryption
+    // 7. Add Cloudflare secrets using libsodium encryption
+    setProgress(85, 'Adding Cloudflare secrets to repo...');
     const pubKeyData = await ghApi('/repos/' + GH_ORG + '/' + repoName + '/actions/secrets/public-key');
-    const encryptedCfToken = await encryptSecret(cfToken, pubKeyData.key);
-    const encryptedAccountId = await encryptSecret(CF_ACCOUNT_ID, pubKeyData.key);
-    await ghApi('/repos/' + GH_ORG + '/' + repoName + '/actions/secrets/CLOUDFLARE_API_TOKEN', 'PUT', { encrypted_value: encryptedCfToken, key_id: pubKeyData.key_id });
-    await ghApi('/repos/' + GH_ORG + '/' + repoName + '/actions/secrets/CLOUDFLARE_ACCOUNT_ID', 'PUT', { encrypted_value: encryptedAccountId, key_id: pubKeyData.key_id });
+    const encCfToken = await encryptSecret(cfToken, pubKeyData.key);
+    const encAccId   = await encryptSecret(cfAccountId, pubKeyData.key);
+    await ghApi('/repos/' + GH_ORG + '/' + repoName + '/actions/secrets/CLOUDFLARE_API_TOKEN', 'PUT', { encrypted_value: encCfToken, key_id: pubKeyData.key_id });
+    await ghApi('/repos/' + GH_ORG + '/' + repoName + '/actions/secrets/CLOUDFLARE_ACCOUNT_ID', 'PUT', { encrypted_value: encAccId, key_id: pubKeyData.key_id });
 
-    // 8. Trigger workflow dispatch
-    setProgress(95, 'Triggering deployment...');
+    // 8. Trigger first deploy
+    setProgress(95, 'Triggering first deployment...');
+    await new Promise(r => setTimeout(r, 2000));
     try {
       await ghApi('/repos/' + GH_ORG + '/' + repoName + '/actions/workflows/deploy.yml/dispatches', 'POST', { ref: 'main' });
-    } catch(e) { /* workflow may not be ready yet — it'll run on next push */ }
+    } catch(e) { /* workflow may take a moment to register */ }
 
     setProgress(100, 'Done!');
-    showStatus('Deployment complete! GitHub Actions will build and deploy the Worker.', 'success');
+    showStatus('Deployment triggered! GitHub Actions will build and deploy the Worker in ~2 minutes.', 'success');
 
-    // Build script output
     const workerUrl = 'https://findanddrivesupport-e-fficient-ui-' + c.key + '.still-fire-1c3d.workers.dev';
     document.getElementById('script-mode1').textContent =
       `<!-- Add before </body> -->\n<script>\n  window.EfficientWidget = {\n    dealer: "${c.key}",\n    label: "${c.label}",\n    tagline: "${c.tagline}",\n    primaryColor: "${c.primary}"\n  };\n<\/script>\n<script src="${workerUrl}/widget.js"><\/script>`;
@@ -566,31 +553,6 @@ async function startDeploy() {
     document.getElementById('deploy-btn').disabled = false;
     setProgress(0, '');
   }
-}
-
-async function encryptSecret(secret, publicKey) {
-  // Use libsodium for GitHub secret encryption
-  const encoder = new TextEncoder();
-  const keyBytes = Uint8Array.from(atob(publicKey), c => c.charCodeAt(0));
-  const secretBytes = encoder.encode(secret);
-  // Import the public key
-  const importedKey = await crypto.subtle.importKey('raw', keyBytes, { name: 'X25519' }, false, []);
-  // Generate ephemeral key pair
-  const ephemeral = await crypto.subtle.generateKey({ name: 'X25519' }, true, ['deriveKey']);
-  const sharedSecret = await crypto.subtle.deriveKey(
-    { name: 'X25519', public: importedKey },
-    ephemeral.privateKey,
-    { name: 'AES-GCM', length: 256 },
-    false, ['encrypt']
-  );
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, sharedSecret, secretBytes);
-  const ephemeralPublic = await crypto.subtle.exportKey('raw', ephemeral.publicKey);
-  const combined = new Uint8Array(ephemeralPublic.byteLength + iv.byteLength + encrypted.byteLength);
-  combined.set(new Uint8Array(ephemeralPublic), 0);
-  combined.set(iv, ephemeralPublic.byteLength);
-  combined.set(new Uint8Array(encrypted), ephemeralPublic.byteLength + iv.byteLength);
-  return btoa(String.fromCharCode(...combined));
 }
 
 function buildWorkflow(key) {
@@ -702,10 +664,10 @@ function copyText(srcId, btnId) {
 }
 
 function resetAll() {
-  ghToken = ''; cfToken = '';
-  ['gh-token','cf-token','dealer-name','dealer-key','branch-code','allowed-domains','mixpanel-token','widget-label'].forEach(id => {
+  ghToken = ''; cfToken = ''; cfAccountId = '';
+  ['gh-token','cf-token','cf-account-id','dealer-name','dealer-key','branch-code','allowed-domains','mixpanel-token','widget-label'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.value = el.id === 'widget-label' ? 'Check affordability' : '';
+    if (el) el.value = id === 'widget-label' ? 'Check affordability' : '';
   });
   document.getElementById('col-primary').value = '#6C3FC5';
   document.getElementById('col-primary-txt').value = '#6C3FC5';

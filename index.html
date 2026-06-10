@@ -420,47 +420,25 @@ async function ghApi(path, method, body) {
 }
 
 async function encryptSecret(secret, b64Key) {
-  // GitHub requires libsodium crypto_box_seal (X25519 + XSalsa20-Poly1305)
-  // We implement this using Web Crypto ECDH for key exchange + AES-GCM for encryption
-  // This matches what GitHub expects for sealed box encryption
-  const keyBytes = Uint8Array.from(atob(b64Key), c => c.charCodeAt(0));
-  const secretBytes = new TextEncoder().encode(secret);
-
-  // Import recipient public key as raw X25519
-  const recipientKey = await crypto.subtle.importKey(
-    'raw', keyBytes, { name: 'X25519' }, false, []
-  );
-
-  // Generate ephemeral X25519 key pair
-  const ephemeralPair = await crypto.subtle.generateKey(
-    { name: 'X25519' }, true, ['deriveKey', 'deriveBits']
-  );
-
-  // Derive shared secret
-  const sharedBits = await crypto.subtle.deriveBits(
-    { name: 'X25519', public: recipientKey },
-    ephemeralPair.privateKey, 256
-  );
-
-  // Derive AES-GCM key from shared secret using HKDF
-  const hkdfKey = await crypto.subtle.importKey('raw', sharedBits, 'HKDF', false, ['deriveKey']);
-  const ephemeralPubRaw = await crypto.subtle.exportKey('raw', ephemeralPair.publicKey);
-  const aesKey = await crypto.subtle.deriveKey(
-    { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(ephemeralPubRaw), info: new Uint8Array() },
-    hkdfKey, { name: 'AES-GCM', length: 256 }, false, ['encrypt']
-  );
-
-  // Encrypt
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, aesKey, secretBytes);
-
-  // Combine ephemeral public key + iv + ciphertext
-  const combined = new Uint8Array(ephemeralPubRaw.byteLength + iv.byteLength + encrypted.byteLength);
-  combined.set(new Uint8Array(ephemeralPubRaw), 0);
-  combined.set(iv, ephemeralPubRaw.byteLength);
-  combined.set(new Uint8Array(encrypted), ephemeralPubRaw.byteLength + iv.byteLength);
-
-  return btoa(String.fromCharCode(...combined));
+  if (!window._na) {
+    await new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/libsodium-wrappers-sumo@0.7.11/dist/modules/libsodium-wrappers-sumo.js';
+      s.onload = () => {
+        window.sodium.ready.then(() => {
+          window._na = window.sodium;
+          resolve();
+        }).catch(reject);
+      };
+      s.onerror = () => reject(new Error('Failed to load libsodium-sumo'));
+      document.head.appendChild(s);
+    });
+  }
+  const na = window._na;
+  const key = na.from_base64(b64Key, na.base64_variants.ORIGINAL);
+  const msg = na.from_string(secret);
+  const enc = na.crypto_box_seal(msg, key);
+  return na.to_base64(enc, na.base64_variants.ORIGINAL);
 }
 
 async function startDeploy() {

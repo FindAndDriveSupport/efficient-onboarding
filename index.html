@@ -268,6 +268,16 @@
 
   <!-- Step 5: Scripts -->
   <div id="step5" style="display:none">
+    <div id="secrets-notice" style="display:none; background:#fffbeb; border:1px solid #f59e0b; border-radius:10px; padding:1rem; margin-bottom:1rem;">
+      <p style="font-size:13px; font-weight:600; color:#92400e; margin-bottom:8px;">⚠️ One manual step required</p>
+      <p style="font-size:13px; color:#78350f; margin-bottom:8px;">Add two secrets to <strong id="secrets-repo"></strong> to enable auto-deployment:</p>
+      <div style="background:#1f2937; border-radius:8px; padding:0.75rem; font-family:monospace; font-size:12px; color:#e2e8f0; margin-bottom:8px;">
+        CLOUDFLARE_API_TOKEN = [your CF token]<br>
+        CLOUDFLARE_ACCOUNT_ID = [your CF account ID]
+      </div>
+      <a id="secrets-url" href="#" target="_blank" style="font-size:12px; color:#2563eb;">→ Add secrets on GitHub</a>
+      <p style="font-size:11px; color:#92400e; margin-top:6px;">After adding secrets, go to Actions tab and run the workflow manually.</p>
+    </div>
     <div class="card">
       <h3>✅ Deployment complete</h3>
       <p style="font-size:13px;color:var(--gray-500);margin-bottom:1rem;">Share these script tags with the dealer. They paste them before <code style="background:var(--gray-100);padding:2px 6px;border-radius:4px;">&lt;/body&gt;</code> on their website.</p>
@@ -419,27 +429,7 @@ async function ghApi(path, method, body) {
   return data;
 }
 
-async function encryptSecret(secret, b64Key) {
-  if (!window._na) {
-    await new Promise((resolve, reject) => {
-      const s = document.createElement('script');
-      s.src = 'https://cdn.jsdelivr.net/npm/libsodium-wrappers-sumo@0.7.11/dist/modules/libsodium-wrappers-sumo.js';
-      s.onload = () => {
-        window.sodium.ready.then(() => {
-          window._na = window.sodium;
-          resolve();
-        }).catch(reject);
-      };
-      s.onerror = () => reject(new Error('Failed to load libsodium-sumo'));
-      document.head.appendChild(s);
-    });
-  }
-  const na = window._na;
-  const key = na.from_base64(b64Key, na.base64_variants.ORIGINAL);
-  const msg = na.from_string(secret);
-  const enc = na.crypto_box_seal(msg, key);
-  return na.to_base64(enc, na.base64_variants.ORIGINAL);
-}
+// Secrets are added via GitHub UI — see step 7 instructions
 
 async function startDeploy() {
   const c = getConfig();
@@ -531,17 +521,10 @@ async function startDeploy() {
       ...(workflowSha ? { sha: workflowSha } : {}),
     });
 
-    // 7. Add Cloudflare secrets using libsodium encryption
-    setProgress(85, 'Adding Cloudflare secrets to repo...');
-    const pubKeyData = await ghApi('/repos/' + GH_ORG + '/' + repoName + '/actions/secrets/public-key');
-    const encCfToken = await encryptSecret(cfToken, pubKeyData.key);
-    const encAccId   = await encryptSecret(cfAccountId, pubKeyData.key);
-    await ghApi('/repos/' + GH_ORG + '/' + repoName + '/actions/secrets/CLOUDFLARE_API_TOKEN', 'PUT', {
-      encrypted_value: encCfToken, key_id: pubKeyData.key_id
-    });
-    await ghApi('/repos/' + GH_ORG + '/' + repoName + '/actions/secrets/CLOUDFLARE_ACCOUNT_ID', 'PUT', {
-      encrypted_value: encAccId, key_id: pubKeyData.key_id
-    });
+    // 7. Show secrets instructions (browser cannot encrypt GitHub secrets without libsodium)
+    setProgress(85, 'Almost done...');
+    // Secrets must be added manually — stored for display in step 5
+    window._pendingSecrets = { repoName, cfToken, cfAccountId };
 
     // 8. Trigger first deploy
     setProgress(95, 'Triggering first deployment...');
@@ -554,6 +537,17 @@ async function startDeploy() {
     showStatus('Deployment triggered! GitHub Actions will build and deploy the Worker in ~2 minutes.', 'success');
 
     const workerUrl = 'https://findanddrivesupport-e-fficient-ui-' + c.key + '.still-fire-1c3d.workers.dev';
+
+    // Show secrets instructions
+    const ps = window._pendingSecrets;
+    if (ps) {
+      const secretsUrl = 'https://github.com/' + GH_ORG + '/' + ps.repoName + '/settings/secrets/actions/new';
+      document.getElementById('secrets-notice').style.display = 'block';
+      document.getElementById('secrets-url').href = secretsUrl;
+      document.getElementById('secrets-url').textContent = secretsUrl;
+      document.getElementById('secrets-repo').textContent = ps.repoName;
+    }
+
     document.getElementById('script-mode1').textContent =
       '<!-- Add before </body> -->\n<script>\n  window.EfficientWidget = {\n    dealer: "' + c.key + '",\n    label: "' + c.label + '",\n    tagline: "' + c.tagline + '",\n    primaryColor: "' + c.primary + '"\n  };\n<\/script>\n<script src="' + workerUrl + '/widget.js"><\/script>';
 

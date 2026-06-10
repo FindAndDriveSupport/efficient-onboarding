@@ -1,164 +1,253 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dealer Onboarding — E-fficient</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--font-sans); }
-.portal { padding: 1.5rem 0; max-width: 680px; }
-.step-indicator { display: flex; align-items: center; gap: 0; margin-bottom: 2rem; }
-.step-dot { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
-.step-dot .dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-secondary); }
-.step-dot.active .dot { background: var(--color-background-info); color: var(--color-text-info); border-color: var(--color-border-info); }
-.step-dot.done .dot { background: var(--color-background-success); color: var(--color-text-success); border-color: var(--color-border-success); }
-.step-dot .label { font-size: 11px; color: var(--color-text-secondary); text-align: center; }
-.step-dot.active .label { color: var(--color-text-info); }
-.step-line { flex: 1; height: 0.5px; background: var(--color-border-tertiary); margin-bottom: 18px; }
-.card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.25rem; margin-bottom: 1rem; }
-.card h3 { font-size: 14px; font-weight: 500; margin-bottom: 1rem; color: var(--color-text-primary); }
-.field { margin-bottom: 12px; }
-.field label { display: block; font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
-.field input, .field select { width: 100%; }
-.field .hint { font-size: 11px; color: var(--color-text-tertiary); margin-top: 3px; }
-.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-.color-row { display: flex; align-items: center; gap: 8px; }
-.color-row input[type=color] { width: 36px; height: 36px; padding: 2px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); cursor: pointer; }
-.color-row input[type=text] { flex: 1; }
-.toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
-.toggle-row:last-child { border-bottom: none; }
-.toggle-row span { font-size: 13px; color: var(--color-text-primary); }
-.toggle { position: relative; width: 36px; height: 20px; }
-.toggle input { opacity: 0; width: 0; height: 0; }
-.toggle-slider { position: absolute; inset: 0; background: var(--color-border-secondary); border-radius: 10px; cursor: pointer; transition: background 0.2s; }
-.toggle input:checked + .toggle-slider { background: var(--color-background-info); }
-.toggle-slider:before { content: ''; position: absolute; width: 14px; height: 14px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: transform 0.2s; }
-.toggle input:checked + .toggle-slider:before { transform: translateX(16px); }
-.btn-row { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1.5rem; }
-.btn-secondary { padding: 8px 16px; font-size: 13px; }
-.btn-primary { padding: 8px 16px; font-size: 13px; background: var(--color-background-info); color: var(--color-text-info); border-color: var(--color-border-info); }
-.token-field { position: relative; }
-.token-field input { padding-right: 36px; }
-.token-eye { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--color-text-tertiary); font-size: 16px; background: none; border: none; }
-.preview-box { background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 1.25rem; margin-bottom: 1rem; }
-.preview-box .preview-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 50px; color: white; font-size: 13px; font-weight: 500; cursor: pointer; border: none; }
-.script-box { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 1rem; font-family: var(--font-mono); font-size: 12px; color: var(--color-text-primary); white-space: pre-wrap; word-break: break-all; position: relative; }
-.copy-btn { position: absolute; top: 8px; right: 8px; font-size: 11px; padding: 4px 8px; }
-.status-msg { padding: 10px 14px; border-radius: var(--border-radius-md); font-size: 13px; margin-bottom: 12px; display: none; }
-.status-msg.info { display: block; background: var(--color-background-info); color: var(--color-text-info); border: 0.5px solid var(--color-border-info); }
-.status-msg.success { display: block; background: var(--color-background-success); color: var(--color-text-success); border: 0.5px solid var(--color-border-success); }
-.status-msg.error { display: block; background: var(--color-background-danger); color: var(--color-text-danger); border: 0.5px solid var(--color-border-danger); }
-.progress { height: 4px; background: var(--color-border-tertiary); border-radius: 2px; margin: 8px 0; overflow: hidden; }
-.progress-bar { height: 100%; background: var(--color-background-info); border-radius: 2px; transition: width 0.5s; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --purple: #6C3FC5;
+    --purple-light: #8B5CF6;
+    --success: #16a34a;
+    --success-bg: #f0fdf4;
+    --success-border: #86efac;
+    --error: #dc2626;
+    --error-bg: #fef2f2;
+    --error-border: #fca5a5;
+    --info: #2563eb;
+    --info-bg: #eff6ff;
+    --info-border: #93c5fd;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    --radius: 10px;
+    --radius-lg: 14px;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--gray-50); color: var(--gray-900); min-height: 100vh; padding: 2rem 1rem; }
+  .container { max-width: 640px; margin: 0 auto; }
+  .header { margin-bottom: 2rem; }
+  .header h1 { font-size: 22px; font-weight: 600; color: var(--gray-900); }
+  .header p { font-size: 14px; color: var(--gray-500); margin-top: 4px; }
+
+  /* Step indicator */
+  .steps { display: flex; align-items: center; margin-bottom: 2rem; }
+  .step { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+  .step-dot { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; border: 1.5px solid var(--gray-300); background: white; color: var(--gray-400); }
+  .step.active .step-dot { background: var(--info-bg); color: var(--info); border-color: var(--info); }
+  .step.done .step-dot { background: var(--success-bg); color: var(--success); border-color: var(--success-border); }
+  .step-label { font-size: 11px; color: var(--gray-400); text-align: center; white-space: nowrap; }
+  .step.active .step-label { color: var(--info); }
+  .step.done .step-label { color: var(--success); }
+  .step-line { flex: 1; height: 1px; background: var(--gray-200); margin-bottom: 18px; }
+
+  /* Cards */
+  .card { background: white; border: 1px solid var(--gray-200); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1rem; }
+  .card h3 { font-size: 14px; font-weight: 600; color: var(--gray-800); margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+
+  /* Form fields */
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 12px; font-weight: 500; color: var(--gray-600); margin-bottom: 5px; }
+  .field input, .field select { width: 100%; height: 38px; padding: 0 12px; border: 1px solid var(--gray-300); border-radius: var(--radius); font-size: 13px; color: var(--gray-900); background: white; outline: none; transition: border-color 0.15s; }
+  .field input:focus, .field select:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(108,63,197,0.1); }
+  .field .hint { font-size: 11px; color: var(--gray-400); margin-top: 4px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* Password field */
+  .pw-wrap { position: relative; }
+  .pw-wrap input { padding-right: 40px; }
+  .pw-toggle { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--gray-400); font-size: 13px; padding: 4px; }
+
+  /* Color picker */
+  .color-row { display: flex; align-items: center; gap: 8px; }
+  .color-row input[type=color] { width: 38px; height: 38px; padding: 2px 3px; border: 1px solid var(--gray-300); border-radius: var(--radius); cursor: pointer; background: white; }
+  .color-row input[type=text] { flex: 1; }
+
+  /* Toggle */
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--gray-100); }
+  .toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .toggle-row span { font-size: 13px; color: var(--gray-700); }
+  .toggle { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+  .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .toggle-track { position: absolute; inset: 0; background: var(--gray-300); border-radius: 11px; cursor: pointer; transition: background 0.2s; }
+  .toggle input:checked ~ .toggle-track { background: var(--purple); }
+  .toggle-thumb { position: absolute; width: 16px; height: 16px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.2s; pointer-events: none; }
+  .toggle input:checked ~ .toggle-thumb { transform: translateX(18px); }
+
+  /* Buttons */
+  .btn-row { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1.5rem; }
+  button { font-family: inherit; cursor: pointer; border-radius: var(--radius); font-size: 13px; font-weight: 500; padding: 9px 18px; border: 1px solid var(--gray-300); background: white; color: var(--gray-700); transition: background 0.15s; }
+  button:hover { background: var(--gray-50); }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary { background: var(--purple); color: white; border-color: var(--purple); }
+  .btn-primary:hover { background: var(--purple-light); border-color: var(--purple-light); }
+
+  /* Status */
+  .status { padding: 10px 14px; border-radius: var(--radius); font-size: 13px; margin-bottom: 14px; display: none; }
+  .status.info { display: block; background: var(--info-bg); color: var(--info); border: 1px solid var(--info-border); }
+  .status.success { display: block; background: var(--success-bg); color: var(--success); border: 1px solid var(--success-border); }
+  .status.error { display: block; background: var(--error-bg); color: var(--error); border: 1px solid var(--error-border); }
+
+  /* Progress */
+  .progress-wrap { margin: 10px 0; display: none; }
+  .progress-wrap.show { display: block; }
+  .progress-bar-bg { height: 6px; background: var(--gray-200); border-radius: 3px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: var(--purple); border-radius: 3px; transition: width 0.4s; }
+  .progress-label { font-size: 12px; color: var(--gray-500); margin-top: 5px; }
+
+  /* Preview */
+  .preview-area { background: var(--gray-50); border-radius: var(--radius); padding: 1.25rem; margin-top: 1rem; display: flex; align-items: center; gap: 12px; }
+  .fab-preview { display: inline-flex; align-items: center; gap: 10px; padding: 10px 18px 10px 10px; border-radius: 50px; cursor: default; }
+  .fab-icon { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .fab-icon svg { width: 18px; height: 18px; fill: white; }
+  .fab-text-label { font-size: 13px; font-weight: 700; color: #1a1a1a; }
+  .fab-text-tag { font-size: 11px; color: #666; max-width: 160px; }
+
+  /* Script box */
+  .script-wrap { position: relative; margin-top: 8px; }
+  .script-box { background: var(--gray-900); color: #e2e8f0; border-radius: var(--radius); padding: 1rem; font-family: 'Courier New', monospace; font-size: 12px; white-space: pre-wrap; word-break: break-all; line-height: 1.6; }
+  .copy-btn { position: absolute; top: 8px; right: 8px; font-size: 11px; padding: 4px 10px; background: rgba(255,255,255,0.1); color: #e2e8f0; border-color: rgba(255,255,255,0.2); border-radius: 6px; }
+  .copy-btn:hover { background: rgba(255,255,255,0.2); }
+
+  /* Deploy summary */
+  .summary-row { display: flex; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--gray-100); font-size: 13px; }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-row .key { color: var(--gray-500); min-width: 130px; flex-shrink: 0; }
+  .summary-row .val { color: var(--gray-800); font-weight: 500; }
+
+  /* Cloudflare fields */
+  .cf-section { background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: var(--radius); padding: 1rem; margin-top: 1rem; }
+  .cf-section h4 { font-size: 12px; font-weight: 600; color: var(--gray-600); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
 </style>
-
-<div class="portal">
-  <h2 style="font-size: 18px; font-weight: 500; margin-bottom: 0.25rem;">Dealer onboarding</h2>
-  <p style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 1.5rem;">Set up a new dealer deployment in minutes.</p>
-
-  <div class="step-indicator">
-    <div class="step-dot active" id="s1"><div class="dot">1</div><div class="label">Auth</div></div>
-    <div class="step-line"></div>
-    <div class="step-dot" id="s2"><div class="dot">2</div><div class="label">Dealer details</div></div>
-    <div class="step-line"></div>
-    <div class="step-dot" id="s3"><div class="dot">3</div><div class="label">Theme</div></div>
-    <div class="step-line"></div>
-    <div class="step-dot" id="s4"><div class="dot">4</div><div class="label">Deploy</div></div>
-    <div class="step-line"></div>
-    <div class="step-dot" id="s5"><div class="dot">5</div><div class="label">Scripts</div></div>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Dealer onboarding</h1>
+    <p>Set up a new dealer deployment in minutes.</p>
   </div>
 
-  <div id="status" class="status-msg"></div>
+  <div class="steps">
+    <div class="step active" id="s1"><div class="step-dot">1</div><div class="step-label">Auth</div></div>
+    <div class="step-line"></div>
+    <div class="step active" id="s2" style="display:none"><div class="step-dot">2</div><div class="step-label">Details</div></div>
+    <div class="step" id="s2v"><div class="step-dot">2</div><div class="step-label">Details</div></div>
+    <div class="step-line"></div>
+    <div class="step" id="s3v"><div class="step-dot">3</div><div class="step-label">Theme</div></div>
+    <div class="step-line"></div>
+    <div class="step" id="s4v"><div class="step-dot">4</div><div class="step-label">Deploy</div></div>
+    <div class="step-line"></div>
+    <div class="step" id="s5v"><div class="step-dot">5</div><div class="step-label">Scripts</div></div>
+  </div>
+
+  <div id="statusMsg" class="status"></div>
 
   <!-- Step 1: Auth -->
   <div id="step1">
     <div class="card">
-      <h3><i class="ti ti-lock" aria-hidden="true" style="margin-right:6px"></i>GitHub authentication</h3>
+      <h3>🔐 Authentication</h3>
       <div class="field">
         <label>GitHub personal access token</label>
-        <div class="token-field">
+        <div class="pw-wrap">
           <input type="password" id="gh-token" placeholder="github_pat_..." />
-          <button class="token-eye" onclick="toggleToken()"><i class="ti ti-eye" id="eye-icon"></i></button>
+          <button class="pw-toggle" onclick="togglePw('gh-token','gh-eye')"><span id="gh-eye">Show</span></button>
         </div>
-        <div class="hint">Needs repo + workflow scopes. Never stored — only used in this session.</div>
+        <div class="hint">Needs repo + workflow scopes. Session only — never stored.</div>
+      </div>
+      <div class="field">
+        <label>Cloudflare API token</label>
+        <div class="pw-wrap">
+          <input type="password" id="cf-token" placeholder="Enter Cloudflare API token" />
+          <button class="pw-toggle" onclick="togglePw('cf-token','cf-eye')"><span id="cf-eye">Show</span></button>
+        </div>
+        <div class="hint">Needs Workers Scripts: Edit + Account Settings: Read.</div>
       </div>
     </div>
     <div class="btn-row">
-      <button class="btn-primary" onclick="validateToken()"><i class="ti ti-arrow-right" aria-hidden="true" style="margin-right:4px"></i>Continue</button>
+      <button class="btn-primary" onclick="validateAuth()">Continue →</button>
     </div>
   </div>
 
   <!-- Step 2: Dealer Details -->
   <div id="step2" style="display:none">
     <div class="card">
-      <h3><i class="ti ti-building-store" aria-hidden="true" style="margin-right:6px"></i>Dealer details</h3>
+      <h3>🏪 Dealer details</h3>
       <div class="field">
-        <label>Dealer name</label>
+        <label>Dealer name *</label>
         <input type="text" id="dealer-name" placeholder="e.g. North Western Ford" oninput="autoKey()" />
       </div>
       <div class="grid2">
         <div class="field">
-          <label>Dealer key</label>
+          <label>Dealer key *</label>
           <input type="text" id="dealer-key" placeholder="e.g. north-western-ford" />
-          <div class="hint">Auto-generated. Lowercase, hyphens only.</div>
+          <div class="hint">Auto-generated. Lowercase + hyphens only.</div>
         </div>
         <div class="field">
-          <label>Branch code</label>
+          <label>Branch code *</label>
           <input type="text" id="branch-code" placeholder="e.g. NWMC001" />
-          <div class="hint">Edith branch code for this dealer.</div>
+          <div class="hint">Edith branch code.</div>
         </div>
       </div>
       <div class="field">
-        <label>Allowed domains (comma separated)</label>
+        <label>Allowed domains * <span style="font-weight:400;color:var(--gray-400)">(comma separated)</span></label>
         <input type="text" id="allowed-domains" placeholder="northwesternmotors.co.za, www.northwesternmotors.co.za" />
-        <div class="hint">Domains allowed to embed the widget.</div>
       </div>
       <div class="field">
-        <label>Mixpanel token (optional)</label>
+        <label>Mixpanel token <span style="font-weight:400;color:var(--gray-400)">(optional)</span></label>
         <input type="text" id="mixpanel-token" placeholder="Leave blank to skip" />
       </div>
     </div>
     <div class="card">
-      <h3><i class="ti ti-adjustments" aria-hidden="true" style="margin-right:6px"></i>Features</h3>
+      <h3>⚙️ Features</h3>
       <div class="toggle-row">
         <span>Show deposit field</span>
-        <label class="toggle"><input type="checkbox" id="feat-deposit" checked /><span class="toggle-slider"></span></label>
+        <label class="toggle"><input type="checkbox" id="feat-deposit" checked /><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
       </div>
       <div class="toggle-row">
         <span>Show current finance field</span>
-        <label class="toggle"><input type="checkbox" id="feat-finance" checked /><span class="toggle-slider"></span></label>
+        <label class="toggle"><input type="checkbox" id="feat-finance" checked /><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
       </div>
       <div class="toggle-row">
         <span>Accept vehicle query params</span>
-        <label class="toggle"><input type="checkbox" id="feat-params" checked /><span class="toggle-slider"></span></label>
+        <label class="toggle"><input type="checkbox" id="feat-params" checked /><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
       </div>
     </div>
     <div class="btn-row">
-      <button class="btn-secondary" onclick="goTo(1)"><i class="ti ti-arrow-left" aria-hidden="true" style="margin-right:4px"></i>Back</button>
-      <button class="btn-primary" onclick="validateDetails()">Continue <i class="ti ti-arrow-right" aria-hidden="true" style="margin-left:4px"></i></button>
+      <button onclick="goTo(1)">← Back</button>
+      <button class="btn-primary" onclick="validateDetails()">Continue →</button>
     </div>
   </div>
 
   <!-- Step 3: Theme -->
   <div id="step3" style="display:none">
     <div class="card">
-      <h3><i class="ti ti-palette" aria-hidden="true" style="margin-right:6px"></i>Theme</h3>
+      <h3>🎨 Theme</h3>
       <div class="grid2">
         <div class="field">
           <label>Primary colour</label>
           <div class="color-row">
-            <input type="color" id="color-primary" value="#6C3FC5" oninput="syncColor('primary')" />
-            <input type="text" id="color-primary-text" value="#6C3FC5" oninput="syncColorText('primary')" />
+            <input type="color" id="col-primary" value="#6C3FC5" oninput="syncCol('primary')" />
+            <input type="text" id="col-primary-txt" value="#6C3FC5" oninput="syncColTxt('primary')" placeholder="#6C3FC5" />
           </div>
         </div>
         <div class="field">
           <label>Gradient end colour</label>
           <div class="color-row">
-            <input type="color" id="color-gradient" value="#C026D3" oninput="syncColor('gradient')" />
-            <input type="text" id="color-gradient-text" value="#C026D3" oninput="syncColorText('gradient')" />
+            <input type="color" id="col-grad" value="#C026D3" oninput="syncCol('grad')" />
+            <input type="text" id="col-grad-txt" value="#C026D3" oninput="syncColTxt('grad')" placeholder="#C026D3" />
           </div>
         </div>
       </div>
       <div class="field">
         <label>Widget CTA label</label>
-        <input type="text" id="widget-label" value="Check affordability" />
+        <input type="text" id="widget-label" value="Check affordability" oninput="updatePreview()" />
       </div>
       <div class="field">
         <label>Widget tagline</label>
@@ -167,55 +256,58 @@ body { font-family: var(--font-sans); }
     </div>
     <div class="card">
       <h3>Preview</h3>
-      <div class="preview-box">
-        <button class="preview-btn" id="preview-btn" style="background: linear-gradient(135deg, #6C3FC5, #C026D3)">
-          <i class="ti ti-info-circle" aria-hidden="true"></i>
-          <span id="preview-label">Check affordability</span>
-        </button>
+      <div class="preview-area">
+        <div class="fab-preview" id="fab-preview" style="background:white; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+          <div class="fab-icon" id="fab-icon" style="background: linear-gradient(135deg,#6C3FC5,#C026D3)">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+          </div>
+          <div>
+            <div class="fab-text-label" id="fab-label-preview">Check affordability</div>
+            <div class="fab-text-tag">Find out what you can qualify for in 60 seconds.</div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="btn-row">
-      <button class="btn-secondary" onclick="goTo(2)"><i class="ti ti-arrow-left" aria-hidden="true" style="margin-right:4px"></i>Back</button>
-      <button class="btn-primary" onclick="goTo(4)">Continue <i class="ti ti-arrow-right" aria-hidden="true" style="margin-left:4px"></i></button>
+      <button onclick="goTo(2)">← Back</button>
+      <button class="btn-primary" onclick="goTo(4)">Continue →</button>
     </div>
   </div>
 
   <!-- Step 4: Deploy -->
   <div id="step4" style="display:none">
     <div class="card">
-      <h3><i class="ti ti-rocket" aria-hidden="true" style="margin-right:6px"></i>Ready to deploy</h3>
-      <div id="deploy-summary" style="font-size:13px; color: var(--color-text-secondary); line-height: 1.8;"></div>
+      <h3>🚀 Ready to deploy</h3>
+      <div id="deploy-summary"></div>
     </div>
-    <div id="deploy-progress" style="display:none">
-      <div class="progress"><div class="progress-bar" id="prog-bar" style="width:0%"></div></div>
-      <p id="prog-label" style="font-size:12px; color: var(--color-text-secondary); margin-top:4px;">Starting...</p>
+    <div class="progress-wrap" id="progress-wrap">
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-fill" style="width:0%"></div></div>
+      <div class="progress-label" id="prog-label">Starting...</div>
     </div>
     <div class="btn-row">
-      <button class="btn-secondary" onclick="goTo(3)"><i class="ti ti-arrow-left" aria-hidden="true" style="margin-right:4px"></i>Back</button>
-      <button class="btn-primary" id="deploy-btn" onclick="startDeploy()"><i class="ti ti-rocket" aria-hidden="true" style="margin-right:4px"></i>Deploy</button>
+      <button onclick="goTo(3)">← Back</button>
+      <button class="btn-primary" id="deploy-btn" onclick="startDeploy()">🚀 Deploy</button>
     </div>
   </div>
 
   <!-- Step 5: Scripts -->
   <div id="step5" style="display:none">
     <div class="card">
-      <h3><i class="ti ti-check" aria-hidden="true" style="margin-right:6px; color: var(--color-text-success)"></i>Deployment complete</h3>
-      <p style="font-size:13px; color: var(--color-text-secondary); margin-bottom:1rem;">Share these two script tags with the dealer. They paste them before <code>&lt;/body&gt;</code> on their website.</p>
-      <div style="position:relative">
-        <div class="script-box" id="script-output"></div>
-        <button class="copy-btn btn-secondary" onclick="copyScript()"><i class="ti ti-copy" aria-hidden="true" style="margin-right:4px"></i>Copy</button>
+      <h3>✅ Deployment complete</h3>
+      <p style="font-size:13px;color:var(--gray-500);margin-bottom:1rem;">Share these script tags with the dealer. They paste them before <code style="background:var(--gray-100);padding:2px 6px;border-radius:4px;">&lt;/body&gt;</code> on their website.</p>
+      <p style="font-size:12px;color:var(--gray-500);margin-bottom:8px;">Mode 1 — floating widget</p>
+      <div class="script-wrap">
+        <div class="script-box" id="script-mode1"></div>
+        <button class="copy-btn" onclick="copyText('script-mode1','copy1')"><span id="copy1">Copy</span></button>
       </div>
-    </div>
-    <div class="card">
-      <h3>Mode 2 — vehicle button (optional)</h3>
-      <p style="font-size:13px; color: var(--color-text-secondary); margin-bottom:1rem;">For individual vehicle listings, use a direct link instead:</p>
-      <div style="position:relative">
-        <div class="script-box" id="mode2-output"></div>
-        <button class="copy-btn btn-secondary" style="top:8px" onclick="copyMode2()"><i class="ti ti-copy" aria-hidden="true" style="margin-right:4px"></i>Copy</button>
+      <p style="font-size:12px;color:var(--gray-500);margin:1rem 0 8px;">Mode 2 — vehicle button (optional)</p>
+      <div class="script-wrap">
+        <div class="script-box" id="script-mode2"></div>
+        <button class="copy-btn" onclick="copyText('script-mode2','copy2')"><span id="copy2">Copy</span></button>
       </div>
     </div>
     <div class="btn-row">
-      <button class="btn-secondary" onclick="resetAll()"><i class="ti ti-plus" aria-hidden="true" style="margin-right:4px"></i>Onboard another dealer</button>
+      <button class="btn-primary" onclick="resetAll()">+ Onboard another dealer</button>
     </div>
   </div>
 </div>
@@ -223,62 +315,63 @@ body { font-family: var(--font-sans); }
 <script>
 const GH_ORG = 'FindAndDriveSupport';
 const BACKEND_REPO = 'efficient-finance-widget';
-const TEMPLATE_REPO = 'efficient-onboarding';
+const TEMPLATE_REPO = 'e-fficient-ui-template';
 const BACKEND_FILE = 'workers/dealers/dealers.config.js';
+const CF_ACCOUNT_ID = '94a0cf8c128760b5039fe14b5cde5010';
 
-let ghToken = '';
-let currentStep = 1;
+let ghToken = '', cfToken = '';
 
 function showStatus(msg, type) {
-  const el = document.getElementById('status');
+  const el = document.getElementById('statusMsg');
   el.textContent = msg;
-  el.className = 'status-msg ' + type;
+  el.className = 'status ' + type;
+}
+function clearStatus() { document.getElementById('statusMsg').className = 'status'; }
+
+function togglePw(id, eyeId) {
+  const inp = document.getElementById(id);
+  const eye = document.getElementById(eyeId);
+  if (inp.type === 'password') { inp.type = 'text'; eye.textContent = 'Hide'; }
+  else { inp.type = 'password'; eye.textContent = 'Show'; }
 }
 
-function clearStatus() {
-  const el = document.getElementById('status');
-  el.className = 'status-msg';
-}
-
-function toggleToken() {
-  const inp = document.getElementById('gh-token');
-  const icon = document.getElementById('eye-icon');
-  if (inp.type === 'password') { inp.type = 'text'; icon.className = 'ti ti-eye-off'; }
-  else { inp.type = 'password'; icon.className = 'ti ti-eye'; }
+function setProgress(pct, label) {
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = label;
 }
 
 function goTo(step) {
-  for (let i = 1; i <= 5; i++) {
+  [1,2,3,4,5].forEach(i => {
     document.getElementById('step' + i).style.display = i === step ? 'block' : 'none';
-    const dot = document.getElementById('s' + i);
-    dot.className = 'step-dot' + (i === step ? ' active' : i < step ? ' done' : '');
-    if (i < step) dot.querySelector('.dot').innerHTML = '<i class="ti ti-check" style="font-size:12px"></i>';
-    else dot.querySelector('.dot').textContent = i;
-  }
-  currentStep = step;
+  });
+  ['s1','s2v','s3v','s4v','s5v'].forEach((id, idx) => {
+    const n = idx + 1;
+    const el = document.getElementById(id);
+    el.className = 'step' + (n === step ? ' active' : n < step ? ' done' : '');
+    el.querySelector('.step-dot').textContent = n < step ? '✓' : n;
+  });
   clearStatus();
+  if (step === 4) buildSummary();
 }
 
-async function validateToken() {
-  const token = document.getElementById('gh-token').value.trim();
-  if (!token) { showStatus('Please enter your GitHub token.', 'error'); return; }
-  showStatus('Validating token...', 'info');
+async function validateAuth() {
+  const gh = document.getElementById('gh-token').value.trim();
+  const cf = document.getElementById('cf-token').value.trim();
+  if (!gh || !cf) { showStatus('Please enter both tokens.', 'error'); return; }
+  showStatus('Validating tokens...', 'info');
   try {
-    const res = await fetch('https://api.github.com/user', { headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json' } });
-    if (!res.ok) throw new Error('Invalid token');
+    const res = await fetch('https://api.github.com/user', { headers: { Authorization: 'Bearer ' + gh, Accept: 'application/vnd.github+json' } });
+    if (!res.ok) throw new Error('Invalid GitHub token');
     const user = await res.json();
-    ghToken = token;
+    ghToken = gh; cfToken = cf;
     showStatus('Authenticated as ' + user.login, 'success');
     setTimeout(() => goTo(2), 800);
-  } catch (e) {
-    showStatus('Token validation failed. Check your token and try again.', 'error');
-  }
+  } catch (e) { showStatus('GitHub token invalid: ' + e.message, 'error'); }
 }
 
 function autoKey() {
   const name = document.getElementById('dealer-name').value;
-  const key = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  document.getElementById('dealer-key').value = key;
+  document.getElementById('dealer-key').value = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
 function validateDetails() {
@@ -291,55 +384,45 @@ function validateDetails() {
   goTo(3);
 }
 
-function syncColor(type) {
-  const val = document.getElementById('color-' + type).value;
-  document.getElementById('color-' + type + '-text').value = val;
+function syncCol(type) {
+  document.getElementById('col-' + type + '-txt').value = document.getElementById('col-' + type).value;
   updatePreview();
 }
-
-function syncColorText(type) {
-  const val = document.getElementById('color-' + type + '-text').value;
-  if (/^#[0-9a-fA-F]{6}$/.test(val)) {
-    document.getElementById('color-' + type).value = val;
-    updatePreview();
-  }
+function syncColTxt(type) {
+  const val = document.getElementById('col-' + type + '-txt').value;
+  if (/^#[0-9a-fA-F]{6}$/.test(val)) { document.getElementById('col-' + type).value = val; updatePreview(); }
 }
-
 function updatePreview() {
-  const p = document.getElementById('color-primary').value;
-  const g = document.getElementById('color-gradient').value;
-  const label = document.getElementById('widget-label').value;
-  document.getElementById('preview-btn').style.background = 'linear-gradient(135deg, ' + p + ', ' + g + ')';
-  document.getElementById('preview-label').textContent = label;
+  const p = document.getElementById('col-primary').value;
+  const g = document.getElementById('col-grad').value;
+  document.getElementById('fab-icon').style.background = 'linear-gradient(135deg,' + p + ',' + g + ')';
+  document.getElementById('fab-label-preview').textContent = document.getElementById('widget-label').value;
 }
 
-document.getElementById('widget-label').addEventListener('input', updatePreview);
-
-function buildDeployerConfig() {
-  const key = document.getElementById('dealer-key').value.trim();
-  const name = document.getElementById('dealer-name').value.trim();
-  const branch = document.getElementById('branch-code').value.trim();
-  const domains = document.getElementById('allowed-domains').value.split(',').map(d => d.trim()).filter(Boolean);
-  const primary = document.getElementById('color-primary').value;
-  const gradEnd = document.getElementById('color-gradient').value;
-  const mixpanel = document.getElementById('mixpanel-token').value.trim();
-  const showDeposit = document.getElementById('feat-deposit').checked;
-  const showFinance = document.getElementById('feat-finance').checked;
-  const showParams = document.getElementById('feat-params').checked;
-
-  return { key, name, branch, domains, primary, gradEnd, mixpanel, showDeposit, showFinance, showParams };
+function getConfig() {
+  return {
+    key: document.getElementById('dealer-key').value.trim(),
+    name: document.getElementById('dealer-name').value.trim(),
+    branch: document.getElementById('branch-code').value.trim(),
+    domains: document.getElementById('allowed-domains').value.split(',').map(d => d.trim()).filter(Boolean),
+    mixpanel: document.getElementById('mixpanel-token').value.trim(),
+    primary: document.getElementById('col-primary').value,
+    gradEnd: document.getElementById('col-grad').value,
+    label: document.getElementById('widget-label').value,
+    tagline: document.getElementById('widget-tagline').value,
+    showDeposit: document.getElementById('feat-deposit').checked,
+    showFinance: document.getElementById('feat-finance').checked,
+    showParams: document.getElementById('feat-params').checked,
+  };
 }
 
-function goToStep4() {
-  const c = buildDeployerConfig();
+function buildSummary() {
+  const c = getConfig();
   document.getElementById('deploy-summary').innerHTML = [
-    '<strong>Dealer:</strong> ' + c.name,
-    '<strong>Key:</strong> ' + c.key,
-    '<strong>Branch code:</strong> ' + c.branch,
-    '<strong>Domains:</strong> ' + c.domains.join(', '),
-    '<strong>Primary colour:</strong> ' + c.primary,
-  ].join('<br>');
-  goTo(4);
+    ['Dealer', c.name], ['Key', c.key], ['Branch code', c.branch],
+    ['Domains', c.domains.join(', ')], ['Primary colour', c.primary],
+    ['Repo', GH_ORG + '/e-fficient-ui-' + c.key],
+  ].map(([k,v]) => `<div class="summary-row"><span class="key">${k}</span><span class="val">${v}</span></div>`).join('');
 }
 
 async function ghApi(path, method, body) {
@@ -353,42 +436,42 @@ async function ghApi(path, method, body) {
   return data;
 }
 
-function setProgress(pct, label) {
-  document.getElementById('prog-bar').style.width = pct + '%';
-  document.getElementById('prog-label').textContent = label;
+async function cfApi(path, method, body) {
+  const res = await fetch('https://api.cloudflare.com/client/v4' + path, {
+    method: method || 'GET',
+    headers: { Authorization: 'Bearer ' + cfToken, 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json();
+  if (!data.success) throw new Error((data.errors && data.errors[0] && data.errors[0].message) || 'Cloudflare API error');
+  return data;
 }
 
 async function startDeploy() {
-  const c = buildDeployerConfig();
+  const c = getConfig();
   document.getElementById('deploy-btn').disabled = true;
-  document.getElementById('deploy-progress').style.display = 'block';
+  document.getElementById('progress-wrap').classList.add('show');
   clearStatus();
 
   try {
-    // Step 1: Get current backend file
+    // 1. Update backend dealers.config.js
     setProgress(10, 'Reading backend config...');
     const fileData = await ghApi('/repos/' + GH_ORG + '/' + BACKEND_REPO + '/contents/' + BACKEND_FILE);
-    const currentContent = atob(fileData.content.replace(/\n/g, ''));
-
-    // Step 2: Build new dealer entry
-    setProgress(25, 'Preparing dealer entry...');
+    const currentContent = decodeURIComponent(escape(atob(fileData.content.replace(/\n/g, ''))));
     const domainsStr = c.domains.map(d => "'" + d + "'").join(',\n      ');
-    const newEntry = `\n  '${c.key}': {\n    name: '${c.name}',\n    branchCode: '${c.branch}',\n    allowedDomains: [\n      ${domainsStr},\n    ],\n    mixpanelToken: '${c.mixpanel}',\n    theme: {\n      primary: '${c.primary}',\n      gradient: 'linear-gradient(135deg, ${c.primary} 0%, ${c.gradEnd} 100%)',\n      fontFamily: "'Inter', sans-serif",\n      borderRadius: '12px',\n    },\n    features: {\n      showDeposit: ${c.showDeposit},\n      showCurrentFinance: ${c.showFinance},\n      vehicleQueryParams: ${c.showParams},\n    },\n  },`;
-
-    // Insert before closing brace of DEALERS
-    const updatedContent = currentContent.replace(/(\n};)(\s*\/\/ ── Lookup)/, newEntry + '$1$2');
+    const newEntry = `\n  '${c.key}': {\n    name: '${c.name}',\n    branchCode: '${c.branch}',\n    allowedDomains: [\n      ${domainsStr},\n    ],\n    mixpanelToken: '${c.mixpanel}',\n    theme: {\n      primary: '${c.primary}',\n      gradient: 'linear-gradient(135deg, ${c.primary} 0%, ${c.gradEnd} 100%)',\n      fontFamily: "'Inter', sans-serif",\n      borderRadius: '12px',\n    },\n    features: {\n      showDeposit: ${c.showDeposit},\n      showCurrentFinance: ${c.showFinance},\n      vehicleQueryParams: ${c.showParams},\n    },\n  },\n`;
+    const updatedContent = currentContent.replace(/(\/\/ ── Lookup helpers)/, newEntry + '$1');
     const encoded = btoa(unescape(encodeURIComponent(updatedContent)));
 
-    // Step 3: Commit to backend
-    setProgress(40, 'Updating backend config...');
+    setProgress(20, 'Updating backend config...');
     await ghApi('/repos/' + GH_ORG + '/' + BACKEND_REPO + '/contents/' + BACKEND_FILE, 'PUT', {
       message: 'feat: add dealer ' + c.key,
       content: encoded,
       sha: fileData.sha,
     });
 
-    // Step 4: Create frontend repo from template
-    setProgress(60, 'Creating frontend repo...');
+    // 2. Create frontend repo from template
+    setProgress(35, 'Creating frontend repo...');
     const repoName = 'e-fficient-ui-' + c.key;
     await ghApi('/repos/' + GH_ORG + '/' + TEMPLATE_REPO + '/generate', 'POST', {
       owner: GH_ORG,
@@ -398,39 +481,83 @@ async function startDeploy() {
       include_all_branches: false,
     });
 
-    // Wait for repo to be ready
-    await new Promise(r => setTimeout(r, 3000));
+    // Wait for repo to initialise
+    setProgress(45, 'Waiting for repo to initialise...');
+    await new Promise(r => setTimeout(r, 4000));
 
-    // Step 5: Update dealerConfig.ts in new repo
-    setProgress(80, 'Configuring frontend repo...');
-    const configContent = buildFrontendConfig(c);
+    // 3. Commit dealerConfig.ts
+    setProgress(55, 'Configuring dealer settings...');
+    const configContent = buildDealerConfig(c);
     const configEncoded = btoa(unescape(encodeURIComponent(configContent)));
-
-    let configSha = undefined;
-    try {
-      const existing = await ghApi('/repos/' + GH_ORG + '/' + repoName + '/contents/src/config/dealerConfig.ts');
-      configSha = existing.sha;
-    } catch (e) { /* file doesn't exist yet */ }
-
+    let configSha;
+    try { const ex = await ghApi('/repos/' + GH_ORG + '/' + repoName + '/contents/src/config/dealerConfig.ts'); configSha = ex.sha; } catch(e) {}
     await ghApi('/repos/' + GH_ORG + '/' + repoName + '/contents/src/config/dealerConfig.ts', 'PUT', {
       message: 'chore: configure dealer ' + c.key,
       content: configEncoded,
       ...(configSha ? { sha: configSha } : {}),
     });
 
+    // 4. Commit wrangler.toml
+    setProgress(65, 'Setting up wrangler config...');
+    const wranglerContent = `name       = "e-fficient-ui-${c.key}"\nmain       = "dist/server/server.js"\ncompatibility_date = "2024-01-01"\ncompatibility_flags = ["nodejs_compat"]\nassets = { directory = "dist/client" }\n\n[vars]\nNODE_ENV = "production"\n`;
+    const wranglerEncoded = btoa(unescape(encodeURIComponent(wranglerContent)));
+    let wranglerSha;
+    try { const ex = await ghApi('/repos/' + GH_ORG + '/' + repoName + '/contents/wrangler.toml'); wranglerSha = ex.sha; } catch(e) {}
+    await ghApi('/repos/' + GH_ORG + '/' + repoName + '/contents/wrangler.toml', 'PUT', {
+      message: 'chore: set wrangler name for ' + c.key,
+      content: wranglerEncoded,
+      ...(wranglerSha ? { sha: wranglerSha } : {}),
+    });
+
+    // 5. Commit .env
+    setProgress(70, 'Setting environment variables...');
+    const envContent = `VITE_WORKER_URL=https://efficient-finance-widget.still-fire-1c3d.workers.dev\nVITE_DEFAULT_DEALER=${c.key}\n`;
+    const envEncoded = btoa(unescape(encodeURIComponent(envContent)));
+    let envSha;
+    try { const ex = await ghApi('/repos/' + GH_ORG + '/' + repoName + '/contents/.env'); envSha = ex.sha; } catch(e) {}
+    await ghApi('/repos/' + GH_ORG + '/' + repoName + '/contents/.env', 'PUT', {
+      message: 'chore: set env vars for ' + c.key,
+      content: envEncoded,
+      ...(envSha ? { sha: envSha } : {}),
+    });
+
+    // 6. Add GitHub Actions workflow
+    setProgress(78, 'Adding deploy workflow...');
+    const workflowContent = buildWorkflow(c.key);
+    const workflowEncoded = btoa(unescape(encodeURIComponent(workflowContent)));
+    let workflowSha;
+    try { const ex = await ghApi('/repos/' + GH_ORG + '/' + repoName + '/contents/.github/workflows/deploy.yml'); workflowSha = ex.sha; } catch(e) {}
+    await ghApi('/repos/' + GH_ORG + '/' + repoName + '/contents/.github/workflows/deploy.yml', 'PUT', {
+      message: 'ci: add Cloudflare Workers deploy workflow',
+      content: workflowEncoded,
+      ...(workflowSha ? { sha: workflowSha } : {}),
+    });
+
+    // 7. Add Cloudflare secrets to GitHub repo
+    setProgress(88, 'Adding Cloudflare secrets to repo...');
+    // Get repo public key for secret encryption
+    const pubKeyData = await ghApi('/repos/' + GH_ORG + '/' + repoName + '/actions/secrets/public-key');
+    const encryptedCfToken = await encryptSecret(cfToken, pubKeyData.key);
+    const encryptedAccountId = await encryptSecret(CF_ACCOUNT_ID, pubKeyData.key);
+    await ghApi('/repos/' + GH_ORG + '/' + repoName + '/actions/secrets/CLOUDFLARE_API_TOKEN', 'PUT', { encrypted_value: encryptedCfToken, key_id: pubKeyData.key_id });
+    await ghApi('/repos/' + GH_ORG + '/' + repoName + '/actions/secrets/CLOUDFLARE_ACCOUNT_ID', 'PUT', { encrypted_value: encryptedAccountId, key_id: pubKeyData.key_id });
+
+    // 8. Trigger workflow dispatch
+    setProgress(95, 'Triggering deployment...');
+    try {
+      await ghApi('/repos/' + GH_ORG + '/' + repoName + '/actions/workflows/deploy.yml/dispatches', 'POST', { ref: 'main' });
+    } catch(e) { /* workflow may not be ready yet — it'll run on next push */ }
+
     setProgress(100, 'Done!');
-    showStatus('Deployment complete!', 'success');
+    showStatus('Deployment complete! GitHub Actions will build and deploy the Worker.', 'success');
 
     // Build script output
     const workerUrl = 'https://findanddrivesupport-e-fficient-ui-' + c.key + '.still-fire-1c3d.workers.dev';
-    const label = document.getElementById('widget-label').value;
-    const tagline = document.getElementById('widget-tagline').value;
+    document.getElementById('script-mode1').textContent =
+      `<!-- Add before </body> -->\n<script>\n  window.EfficientWidget = {\n    dealer: "${c.key}",\n    label: "${c.label}",\n    tagline: "${c.tagline}",\n    primaryColor: "${c.primary}"\n  };\n<\/script>\n<script src="${workerUrl}/widget.js"><\/script>`;
 
-    document.getElementById('script-output').textContent =
-      `<!-- Add before </body> on every page -->\n<script>\n  window.EfficientWidget = {\n    dealer: "${c.key}",\n    label: "${label}",\n    tagline: "${tagline}",\n    primaryColor: "${c.primary}"\n  };\n<\/script>\n<script src="${workerUrl}/widget.js"><\/script>`;
-
-    document.getElementById('mode2-output').textContent =
-      `<a href="${workerUrl}/?dealer=${c.key}&make=MAKE&model=MODEL&mm=MM_CODE" target="_blank"\n   style="display:inline-block; padding:12px 24px; background:${c.primary}; color:#fff; border-radius:50px; font-family:sans-serif; text-decoration:none;">\n  Apply for finance\n</a>`;
+    document.getElementById('script-mode2').textContent =
+      `<a href="${workerUrl}/?dealer=${c.key}&make=MAKE&model=MODEL&mm=MM_CODE"\n   target="_blank"\n   style="display:inline-block;padding:12px 24px;background:${c.primary};color:#fff;border-radius:50px;font-family:sans-serif;text-decoration:none;">\n  Apply for finance\n</a>`;
 
     setTimeout(() => goTo(5), 800);
 
@@ -441,7 +568,67 @@ async function startDeploy() {
   }
 }
 
-function buildFrontendConfig(c) {
+async function encryptSecret(secret, publicKey) {
+  // Use libsodium for GitHub secret encryption
+  const encoder = new TextEncoder();
+  const keyBytes = Uint8Array.from(atob(publicKey), c => c.charCodeAt(0));
+  const secretBytes = encoder.encode(secret);
+  // Import the public key
+  const importedKey = await crypto.subtle.importKey('raw', keyBytes, { name: 'X25519' }, false, []);
+  // Generate ephemeral key pair
+  const ephemeral = await crypto.subtle.generateKey({ name: 'X25519' }, true, ['deriveKey']);
+  const sharedSecret = await crypto.subtle.deriveKey(
+    { name: 'X25519', public: importedKey },
+    ephemeral.privateKey,
+    { name: 'AES-GCM', length: 256 },
+    false, ['encrypt']
+  );
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, sharedSecret, secretBytes);
+  const ephemeralPublic = await crypto.subtle.exportKey('raw', ephemeral.publicKey);
+  const combined = new Uint8Array(ephemeralPublic.byteLength + iv.byteLength + encrypted.byteLength);
+  combined.set(new Uint8Array(ephemeralPublic), 0);
+  combined.set(iv, ephemeralPublic.byteLength);
+  combined.set(new Uint8Array(encrypted), ephemeralPublic.byteLength + iv.byteLength);
+  return btoa(String.fromCharCode(...combined));
+}
+
+function buildWorkflow(key) {
+  return `name: Deploy to Cloudflare Workers
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --ignore-scripts
+
+      - name: Build
+        run: bun run build
+        env:
+          VITE_WORKER_URL: https://efficient-finance-widget.still-fire-1c3d.workers.dev
+          VITE_DEFAULT_DEALER: ${key}
+
+      - name: Deploy to Cloudflare Workers
+        run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: \${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: \${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+`;
+}
+
+function buildDealerConfig(c) {
   return `export interface DealerTheme {
   primary?: string;
   primaryLight?: string;
@@ -507,41 +694,27 @@ export function getDealerConfig(key?: string): DealerConfig {
 `;
 }
 
-function copyScript() {
-  navigator.clipboard.writeText(document.getElementById('script-output').textContent);
-  showStatus('Copied to clipboard!', 'success');
-  setTimeout(clearStatus, 2000);
-}
-
-function copyMode2() {
-  navigator.clipboard.writeText(document.getElementById('mode2-output').textContent);
-  showStatus('Copied to clipboard!', 'success');
-  setTimeout(clearStatus, 2000);
+function copyText(srcId, btnId) {
+  navigator.clipboard.writeText(document.getElementById(srcId).textContent);
+  const btn = document.getElementById(btnId);
+  btn.textContent = 'Copied!';
+  setTimeout(() => btn.textContent = 'Copy', 2000);
 }
 
 function resetAll() {
-  ghToken = '';
-  document.getElementById('gh-token').value = '';
-  document.getElementById('dealer-name').value = '';
-  document.getElementById('dealer-key').value = '';
-  document.getElementById('branch-code').value = '';
-  document.getElementById('allowed-domains').value = '';
-  document.getElementById('mixpanel-token').value = '';
-  document.getElementById('color-primary').value = '#6C3FC5';
-  document.getElementById('color-primary-text').value = '#6C3FC5';
-  document.getElementById('color-gradient').value = '#C026D3';
-  document.getElementById('color-gradient-text').value = '#C026D3';
-  document.getElementById('widget-label').value = 'Check affordability';
-  document.getElementById('deploy-progress').style.display = 'none';
+  ghToken = ''; cfToken = '';
+  ['gh-token','cf-token','dealer-name','dealer-key','branch-code','allowed-domains','mixpanel-token','widget-label'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = el.id === 'widget-label' ? 'Check affordability' : '';
+  });
+  document.getElementById('col-primary').value = '#6C3FC5';
+  document.getElementById('col-primary-txt').value = '#6C3FC5';
+  document.getElementById('col-grad').value = '#C026D3';
+  document.getElementById('col-grad-txt').value = '#C026D3';
+  document.getElementById('progress-wrap').classList.remove('show');
   document.getElementById('deploy-btn').disabled = false;
   goTo(1);
 }
-
-document.querySelector('#step4 .btn-primary') && null;
-const origGoTo4 = goTo;
-document.querySelectorAll('button').forEach(b => {
-  if (b.textContent.includes('Continue') && b.getAttribute('onclick') === 'goTo(4)') {
-    b.setAttribute('onclick', 'goToStep4()');
-  }
-});
 </script>
+</body>
+</html>

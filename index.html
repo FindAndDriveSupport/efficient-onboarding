@@ -336,7 +336,9 @@ async function validateAuth() {
   if (!gh || !cf || !cfAcc) { showStatus('Please enter all three credentials.', 'error'); return; }
   showStatus('Validating GitHub token...', 'info');
   try {
-    const res = await fetch('https://api.github.com/user', { headers: { Authorization: 'Bearer ' + gh, Accept: 'application/vnd.github+json' } });
+    const res = await fetch('https://api.github.com/user', {
+      headers: { Authorization: 'Bearer ' + gh, Accept: 'application/vnd.github+json' }
+    });
     if (!res.ok) throw new Error('Invalid GitHub token');
     const user = await res.json();
     ghToken = gh; cfToken = cf; cfAccountId = cfAcc;
@@ -398,13 +400,18 @@ function buildSummary() {
     ['Dealer', c.name], ['Key', c.key], ['Branch code', c.branch],
     ['Domains', c.domains.join(', ')], ['Primary colour', c.primary],
     ['Repo', GH_ORG + '/e-fficient-ui-' + c.key],
-  ].map(([k,v]) => `<div class="summary-row"><span class="key">${k}</span><span class="val">${v}</span></div>`).join('');
+  ].map(([k,v]) => '<div class="summary-row"><span class="key">' + k + '</span><span class="val">' + v + '</span></div>').join('');
 }
 
 async function ghApi(path, method, body) {
   const res = await fetch('https://api.github.com' + path, {
     method: method || 'GET',
-    headers: { Authorization: 'Bearer ' + ghToken, Accept: 'application/vnd.github+json', 'Content-Type': 'application/json', 'X-GitHub-Api-Version': '2022-11-28' },
+    headers: {
+      Authorization: 'Bearer ' + ghToken,
+      Accept: 'application/vnd.github+json',
+      'Content-Type': 'application/json',
+      'X-GitHub-Api-Version': '2022-11-28'
+    },
     body: body ? JSON.stringify(body) : undefined,
   });
   const data = await res.json();
@@ -412,19 +419,26 @@ async function ghApi(path, method, body) {
   return data;
 }
 
+async function loadSodium() {
+  if (window._sodiumReady) return window._sodium;
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/libsodium-wrappers@0.7.11/dist/modules/libsodium-wrappers.min.js';
+    s.onload = async () => {
+      try {
+        await libsodium.ready;
+        window._sodium = libsodium;
+        window._sodiumReady = true;
+        resolve(libsodium);
+      } catch(e) { reject(e); }
+    };
+    s.onerror = () => reject(new Error('Failed to load libsodium'));
+    document.head.appendChild(s);
+  });
+}
+
 async function encryptSecret(secret, b64Key) {
-  // Load libsodium for proper NaCl box encryption required by GitHub
-  if (!window._sodium) {
-    await new Promise((resolve, reject) => {
-      const s = document.createElement('script');
-      s.src = 'https://cdn.jsdelivr.net/npm/libsodium-wrappers@0.7.11/dist/modules/libsodium-wrappers.min.js';
-      s.onload = resolve; s.onerror = reject;
-      document.head.appendChild(s);
-    });
-    await window.sodium.ready;
-    window._sodium = window.sodium;
-  }
-  const sodium = window._sodium;
+  const sodium = await loadSodium();
   const keyBytes = sodium.from_base64(b64Key, sodium.base64_variants.ORIGINAL);
   const secretBytes = sodium.from_string(secret);
   const encrypted = sodium.crypto_box_seal(secretBytes, keyBytes);
@@ -443,7 +457,7 @@ async function startDeploy() {
     const fileData = await ghApi('/repos/' + GH_ORG + '/' + BACKEND_REPO + '/contents/' + BACKEND_FILE);
     const currentContent = decodeURIComponent(escape(atob(fileData.content.replace(/\n/g, ''))));
     const domainsStr = c.domains.map(d => "'" + d + "'").join(',\n      ');
-    const newEntry = `\n  '${c.key}': {\n    name: '${c.name}',\n    branchCode: '${c.branch}',\n    allowedDomains: [\n      ${domainsStr},\n    ],\n    mixpanelToken: '${c.mixpanel}',\n    theme: {\n      primary: '${c.primary}',\n      gradient: 'linear-gradient(135deg, ${c.primary} 0%, ${c.gradEnd} 100%)',\n      fontFamily: "'Inter', sans-serif",\n      borderRadius: '12px',\n    },\n    features: {\n      showDeposit: ${c.showDeposit},\n      showCurrentFinance: ${c.showFinance},\n      vehicleQueryParams: ${c.showParams},\n    },\n  },\n`;
+    const newEntry = "\n  '" + c.key + "': {\n    name: '" + c.name + "',\n    branchCode: '" + c.branch + "',\n    allowedDomains: [\n      " + domainsStr + ",\n    ],\n    mixpanelToken: '" + c.mixpanel + "',\n    theme: {\n      primary: '" + c.primary + "',\n      gradient: 'linear-gradient(135deg, " + c.primary + " 0%, " + c.gradEnd + " 100%)',\n      fontFamily: \"'Inter', sans-serif\",\n      borderRadius: '12px',\n    },\n    features: {\n      showDeposit: " + c.showDeposit + ",\n      showCurrentFinance: " + c.showFinance + ",\n      vehicleQueryParams: " + c.showParams + ",\n    },\n  },\n";
     const updatedContent = currentContent.replace(/(\/\/ ── Lookup helpers)/, newEntry + '$1');
     const encoded = btoa(unescape(encodeURIComponent(updatedContent)));
 
@@ -487,7 +501,7 @@ async function startDeploy() {
 
     // 4. Commit wrangler.toml
     setProgress(62, 'Setting up wrangler config...');
-    const wranglerContent = `name       = "e-fficient-ui-${c.key}"\nmain       = "dist/server/server.js"\ncompatibility_date = "2024-01-01"\ncompatibility_flags = ["nodejs_compat"]\nassets = { directory = "dist/client" }\n\n[vars]\nNODE_ENV = "production"\n`;
+    const wranglerContent = 'name       = "e-fficient-ui-' + c.key + '"\nmain       = "dist/server/server.js"\ncompatibility_date = "2024-01-01"\ncompatibility_flags = ["nodejs_compat"]\nassets = { directory = "dist/client" }\n\n[vars]\nNODE_ENV = "production"\n';
     const wranglerEncoded = btoa(unescape(encodeURIComponent(wranglerContent)));
     let wranglerSha;
     try { const ex = await ghApi('/repos/' + GH_ORG + '/' + repoName + '/contents/wrangler.toml'); wranglerSha = ex.sha; } catch(e) {}
@@ -499,7 +513,7 @@ async function startDeploy() {
 
     // 5. Commit .env
     setProgress(68, 'Setting environment variables...');
-    const envContent = `VITE_WORKER_URL=https://efficient-finance-widget.still-fire-1c3d.workers.dev\nVITE_DEFAULT_DEALER=${c.key}\n`;
+    const envContent = 'VITE_WORKER_URL=https://efficient-finance-widget.still-fire-1c3d.workers.dev\nVITE_DEFAULT_DEALER=' + c.key + '\n';
     const envEncoded = btoa(unescape(encodeURIComponent(envContent)));
     let envSha;
     try { const ex = await ghApi('/repos/' + GH_ORG + '/' + repoName + '/contents/.env'); envSha = ex.sha; } catch(e) {}
@@ -526,25 +540,29 @@ async function startDeploy() {
     const pubKeyData = await ghApi('/repos/' + GH_ORG + '/' + repoName + '/actions/secrets/public-key');
     const encCfToken = await encryptSecret(cfToken, pubKeyData.key);
     const encAccId   = await encryptSecret(cfAccountId, pubKeyData.key);
-    await ghApi('/repos/' + GH_ORG + '/' + repoName + '/actions/secrets/CLOUDFLARE_API_TOKEN', 'PUT', { encrypted_value: encCfToken, key_id: pubKeyData.key_id });
-    await ghApi('/repos/' + GH_ORG + '/' + repoName + '/actions/secrets/CLOUDFLARE_ACCOUNT_ID', 'PUT', { encrypted_value: encAccId, key_id: pubKeyData.key_id });
+    await ghApi('/repos/' + GH_ORG + '/' + repoName + '/actions/secrets/CLOUDFLARE_API_TOKEN', 'PUT', {
+      encrypted_value: encCfToken, key_id: pubKeyData.key_id
+    });
+    await ghApi('/repos/' + GH_ORG + '/' + repoName + '/actions/secrets/CLOUDFLARE_ACCOUNT_ID', 'PUT', {
+      encrypted_value: encAccId, key_id: pubKeyData.key_id
+    });
 
     // 8. Trigger first deploy
     setProgress(95, 'Triggering first deployment...');
     await new Promise(r => setTimeout(r, 2000));
     try {
       await ghApi('/repos/' + GH_ORG + '/' + repoName + '/actions/workflows/deploy.yml/dispatches', 'POST', { ref: 'main' });
-    } catch(e) { /* workflow may take a moment to register */ }
+    } catch(e) { /* workflow may take a moment to register — will run on next push */ }
 
     setProgress(100, 'Done!');
     showStatus('Deployment triggered! GitHub Actions will build and deploy the Worker in ~2 minutes.', 'success');
 
     const workerUrl = 'https://findanddrivesupport-e-fficient-ui-' + c.key + '.still-fire-1c3d.workers.dev';
     document.getElementById('script-mode1').textContent =
-      `<!-- Add before </body> -->\n<script>\n  window.EfficientWidget = {\n    dealer: "${c.key}",\n    label: "${c.label}",\n    tagline: "${c.tagline}",\n    primaryColor: "${c.primary}"\n  };\n<\/script>\n<script src="${workerUrl}/widget.js"><\/script>`;
+      '<!-- Add before </body> -->\n<script>\n  window.EfficientWidget = {\n    dealer: "' + c.key + '",\n    label: "' + c.label + '",\n    tagline: "' + c.tagline + '",\n    primaryColor: "' + c.primary + '"\n  };\n<\/script>\n<script src="' + workerUrl + '/widget.js"><\/script>';
 
     document.getElementById('script-mode2').textContent =
-      `<a href="${workerUrl}/?dealer=${c.key}&make=MAKE&model=MODEL&mm=MM_CODE"\n   target="_blank"\n   style="display:inline-block;padding:12px 24px;background:${c.primary};color:#fff;border-radius:50px;font-family:sans-serif;text-decoration:none;">\n  Apply for finance\n</a>`;
+      '<a href="' + workerUrl + '/?dealer=' + c.key + '&make=MAKE&model=MODEL&mm=MM_CODE"\n   target="_blank"\n   style="display:inline-block;padding:12px 24px;background:' + c.primary + ';color:#fff;border-radius:50px;font-family:sans-serif;text-decoration:none;">\n  Apply for finance\n</a>';
 
     setTimeout(() => goTo(5), 800);
 
@@ -556,104 +574,11 @@ async function startDeploy() {
 }
 
 function buildWorkflow(key) {
-  return `name: Deploy to Cloudflare Workers
-
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
-
-      - name: Install dependencies
-        run: bun install --ignore-scripts
-
-      - name: Build
-        run: bun run build
-        env:
-          VITE_WORKER_URL: https://efficient-finance-widget.still-fire-1c3d.workers.dev
-          VITE_DEFAULT_DEALER: ${key}
-
-      - name: Deploy to Cloudflare Workers
-        run: npx wrangler deploy
-        env:
-          CLOUDFLARE_API_TOKEN: \${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: \${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-`;
+  return 'name: Deploy to Cloudflare Workers\n\non:\n  push:\n    branches: [main]\n  workflow_dispatch:\n\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n\n      - uses: oven-sh/setup-bun@v1\n        with:\n          bun-version: latest\n\n      - name: Install dependencies\n        run: bun install --ignore-scripts\n\n      - name: Build\n        run: bun run build\n        env:\n          VITE_WORKER_URL: https://efficient-finance-widget.still-fire-1c3d.workers.dev\n          VITE_DEFAULT_DEALER: ' + key + '\n\n      - name: Deploy to Cloudflare Workers\n        run: npx wrangler deploy\n        env:\n          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}\n          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}\n';
 }
 
 function buildDealerConfig(c) {
-  return `export interface DealerTheme {
-  primary?: string;
-  primaryLight?: string;
-  primaryDark?: string;
-  gradient?: string;
-  fontFamily?: string;
-  borderRadius?: string;
-  logoUrl?: string;
-}
-
-export interface DealerFeatures {
-  showDeposit: boolean;
-  showCurrentFinance: boolean;
-  vehicleQueryParams: boolean;
-}
-
-export interface DealerEntry {
-  name: string;
-  branchCode: string;
-  allowedDomains: string[];
-  mixpanelToken?: string;
-  theme: DealerTheme;
-  features: DealerFeatures;
-}
-
-export interface DealerConfig {
-  key: string;
-  name: string;
-  branchCode: string;
-  allowedDomains: string[];
-  mixpanelToken?: string;
-  theme: DealerTheme;
-  features: DealerFeatures;
-}
-
-export const DEALERS: Record<string, DealerEntry> = {
-  '${c.key}': {
-    name: '${c.name}',
-    branchCode: '${c.branch}',
-    allowedDomains: [${c.domains.map(d => "'" + d + "'").join(', ')}],
-    mixpanelToken: '${c.mixpanel}',
-    theme: {
-      primary: '${c.primary}',
-      gradient: 'linear-gradient(135deg, ${c.primary} 0%, ${c.gradEnd} 100%)',
-      fontFamily: "'Inter', sans-serif",
-      borderRadius: '12px',
-    },
-    features: {
-      showDeposit: ${c.showDeposit},
-      showCurrentFinance: ${c.showFinance},
-      vehicleQueryParams: ${c.showParams},
-    },
-  },
-};
-
-export const DEFAULT_DEALER_KEY = '${c.key}';
-
-export function getDealerConfig(key?: string): DealerConfig {
-  const resolved = key && DEALERS[key] ? key : DEFAULT_DEALER_KEY;
-  const entry = DEALERS[resolved] ?? DEALERS[DEFAULT_DEALER_KEY];
-  return { key: resolved, ...entry };
-}
-`;
+  return 'export interface DealerTheme {\n  primary?: string;\n  primaryLight?: string;\n  primaryDark?: string;\n  gradient?: string;\n  fontFamily?: string;\n  borderRadius?: string;\n  logoUrl?: string;\n}\n\nexport interface DealerFeatures {\n  showDeposit: boolean;\n  showCurrentFinance: boolean;\n  vehicleQueryParams: boolean;\n}\n\nexport interface DealerEntry {\n  name: string;\n  branchCode: string;\n  allowedDomains: string[];\n  mixpanelToken?: string;\n  theme: DealerTheme;\n  features: DealerFeatures;\n}\n\nexport interface DealerConfig {\n  key: string;\n  name: string;\n  branchCode: string;\n  allowedDomains: string[];\n  mixpanelToken?: string;\n  theme: DealerTheme;\n  features: DealerFeatures;\n}\n\nexport const DEALERS: Record<string, DealerEntry> = {\n  \'' + c.key + '\': {\n    name: \'' + c.name + '\',\n    branchCode: \'' + c.branch + '\',\n    allowedDomains: [' + c.domains.map(d => "'" + d + "'").join(', ') + '],\n    mixpanelToken: \'' + c.mixpanel + '\',\n    theme: {\n      primary: \'' + c.primary + '\',\n      gradient: \'linear-gradient(135deg, ' + c.primary + ' 0%, ' + c.gradEnd + ' 100%)\',\n      fontFamily: "\'Inter\', sans-serif",\n      borderRadius: \'12px\',\n    },\n    features: {\n      showDeposit: ' + c.showDeposit + ',\n      showCurrentFinance: ' + c.showFinance + ',\n      vehicleQueryParams: ' + c.showParams + ',\n    },\n  },\n};\n\nexport const DEFAULT_DEALER_KEY = \'' + c.key + '\';\n\nexport function getDealerConfig(key?: string): DealerConfig {\n  const resolved = key && DEALERS[key] ? key : DEFAULT_DEALER_KEY;\n  const entry = DEALERS[resolved] ?? DEALERS[DEFAULT_DEALER_KEY];\n  return { key: resolved, ...entry };\n}\n';
 }
 
 function copyText(srcId, btnId) {

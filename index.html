@@ -163,10 +163,7 @@
         <label>Allowed domains * <span style="font-weight:400;color:var(--gray-400)">(comma separated)</span></label>
         <input type="text" id="allowed-domains" placeholder="northwesternmotors.co.za, www.northwesternmotors.co.za" />
       </div>
-      <div class="field">
-        <label>Mixpanel token <span style="font-weight:400;color:var(--gray-400)">(optional)</span></label>
-        <input type="text" id="mixpanel-token" placeholder="Leave blank to skip" />
-      </div>
+
     </div>
     <div class="card">
       <h3>⚙️ Features</h3>
@@ -372,7 +369,6 @@ function getConfig() {
     name: document.getElementById('dealer-name').value.trim(),
     branch: document.getElementById('branch-code').value.trim(),
     domains: document.getElementById('allowed-domains').value.split(',').map(d => d.trim()).filter(Boolean),
-    mixpanel: document.getElementById('mixpanel-token').value.trim(),
     primary: document.getElementById('col-primary').value,
     gradEnd: document.getElementById('col-grad').value,
     label: document.getElementById('widget-label').value,
@@ -426,7 +422,6 @@ async function startDeploy() {
         name: c.name,
         branch: c.branch,
         domains: c.domains,
-        mixpanel: c.mixpanel,
         primary: c.primary,
         gradEnd: c.gradEnd,
         label: c.label,
@@ -474,7 +469,7 @@ function copyText(srcId, btnId) {
 
 function resetAll() {
   ghToken = ''; cfToken = ''; cfAccountId = '';
-  ['gh-token','dealer-name','dealer-key','branch-code','allowed-domains','mixpanel-token','widget-label'].forEach(id => {
+  ['gh-token','dealer-name','dealer-key','branch-code','allowed-domains','widget-label'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = id === 'widget-label' ? 'Check affordability' : '';
   });

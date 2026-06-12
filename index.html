@@ -416,7 +416,7 @@ async function startDeploy() {
     setProgress(100, 'Done!');
     showStatus('Onboarding workflow triggered! Check GitHub Actions for progress (~3 minutes).', 'success');
 
-    const workerUrl = 'https://findanddrivesupport-e-fficient-ui-' + c.key + '.still-fire-1c3d.workers.dev';
+    const workerUrl = 'https://e-fficient-ui-' + c.key + '.still-fire-1c3d.workers.dev';
     document.getElementById('script-mode1').textContent =
       '<!-- Add before </body> -->\n<script>\n  window.EfficientWidget = {\n    dealer: "' + c.key + '",\n    label: "' + c.label + '",\n    tagline: "' + c.tagline + '",\n    primaryColor: "' + c.primary + '"\n  };\n<\/script>\n<script src="' + workerUrl + '/widget.js"><\/script>';
 

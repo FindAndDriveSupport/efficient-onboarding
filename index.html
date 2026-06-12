@@ -165,21 +165,7 @@
       </div>
 
     </div>
-    <div class="card">
-      <h3>⚙️ Features</h3>
-      <div class="toggle-row">
-        <span>Show deposit field</span>
-        <label class="toggle"><input type="checkbox" id="feat-deposit" checked /><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-      </div>
-      <div class="toggle-row">
-        <span>Show current finance field</span>
-        <label class="toggle"><input type="checkbox" id="feat-finance" checked /><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-      </div>
-      <div class="toggle-row">
-        <span>Accept vehicle query params</span>
-        <label class="toggle"><input type="checkbox" id="feat-params" checked /><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-      </div>
-    </div>
+
     <div class="btn-row">
       <button onclick="goTo(1)">← Back</button>
       <button class="btn-primary" onclick="validateDetails()">Continue →</button>
@@ -373,9 +359,6 @@ function getConfig() {
     gradEnd: document.getElementById('col-grad').value,
     label: document.getElementById('widget-label').value,
     tagline: document.getElementById('widget-tagline').value,
-    showDeposit: document.getElementById('feat-deposit').checked,
-    showFinance: document.getElementById('feat-finance').checked,
-    showParams: document.getElementById('feat-params').checked,
   };
 }
 
@@ -426,9 +409,6 @@ async function startDeploy() {
         gradEnd: c.gradEnd,
         label: c.label,
         tagline: c.tagline,
-        showDeposit: c.showDeposit,
-        showFinance: c.showFinance,
-        showParams: c.showParams,
       }
     });
 

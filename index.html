@@ -163,6 +163,14 @@
         <label>Allowed domains * <span style="font-weight:400;color:var(--gray-400)">(comma separated)</span></label>
         <input type="text" id="allowed-domains" placeholder="northwesternmotors.co.za, www.northwesternmotors.co.za" />
       </div>
+      <div class="field">
+        <label>Finance type *</label>
+        <select id="finance-type">
+          <option value="vehicle">Vehicle</option>
+          <option value="bike">Bike</option>
+        </select>
+        <div class="hint">Controls transaction type sent to Edith.</div>
+      </div>
 
     </div>
 
@@ -329,7 +337,10 @@ function validateDetails() {
   const key = document.getElementById('dealer-key').value.trim();
   const branch = document.getElementById('branch-code').value.trim();
   const domains = document.getElementById('allowed-domains').value.trim();
+  const seritiKey = document.getElementById('seriti-key').value.trim();
+  const seritiSecret = document.getElementById('seriti-secret').value.trim();
   if (!name || !key || !branch || !domains) { showStatus('Please fill in all required fields.', 'error'); return; }
+  if (!seritiKey || !seritiSecret) { showStatus('Please enter Seriti API credentials.', 'error'); return; }
   if (!/^[a-z0-9-]+$/.test(key)) { showStatus('Dealer key must be lowercase letters, numbers and hyphens only.', 'error'); return; }
   goTo(3);
 }
@@ -366,7 +377,7 @@ function buildSummary() {
   const c = getConfig();
   document.getElementById('deploy-summary').innerHTML = [
     ['Dealer', c.name], ['Key', c.key], ['Branch code', c.branch],
-    ['Domains', c.domains.join(', ')], ['Primary colour', c.primary],
+    ['Domains', c.domains.join(', ')], ['Finance type', c.financeType], ['Primary colour', c.primary],
     ['Repo', GH_ORG + '/e-fficient-ui-' + c.key],
   ].map(([k,v]) => '<div class="summary-row"><span class="key">' + k + '</span><span class="val">' + v + '</span></div>').join('');
 }
@@ -410,6 +421,7 @@ async function startDeploy() {
         gradEnd: c.gradEnd,
         label: c.label,
         tagline: c.tagline,
+        financeType: c.financeType,
       }
     });
 
@@ -450,7 +462,7 @@ function copyText(srcId, btnId) {
 
 function resetAll() {
   ghToken = ''; cfToken = ''; cfAccountId = '';
-  ['gh-token','dealer-name','dealer-key','branch-code','allowed-domains','widget-label'].forEach(id => {
+  ['gh-token','dealer-name','dealer-key','branch-code','allowed-domains','seriti-key','seriti-secret','widget-label'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = id === 'widget-label' ? 'Check affordability' : '';
   });

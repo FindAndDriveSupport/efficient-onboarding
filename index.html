@@ -171,7 +171,25 @@
         </select>
         <div class="hint">Controls transaction type sent to Edith.</div>
       </div>
-
+    </div>
+    <div class="card">
+      <h3>🔑 Seriti API credentials</h3>
+      <div class="field">
+        <label>Seriti API key *</label>
+        <div class="pw-wrap">
+          <input type="password" id="seriti-key" placeholder="Enter Seriti API key" />
+          <button class="pw-toggle" onclick="togglePw('seriti-key','seriti-key-eye')"><span id="seriti-key-eye">Show</span></button>
+        </div>
+        <div class="hint">Unique per dealer — stored securely in Cloudflare KV.</div>
+      </div>
+      <div class="field">
+        <label>Seriti API secret *</label>
+        <div class="pw-wrap">
+          <input type="password" id="seriti-secret" placeholder="Enter Seriti API secret" />
+          <button class="pw-toggle" onclick="togglePw('seriti-secret','seriti-secret-eye')"><span id="seriti-secret-eye">Show</span></button>
+        </div>
+        <div class="hint">Unique per dealer — stored securely in Cloudflare KV.</div>
+      </div>
     </div>
 
     <div class="btn-row">
@@ -366,6 +384,9 @@ function getConfig() {
     name: document.getElementById('dealer-name').value.trim(),
     branch: document.getElementById('branch-code').value.trim(),
     domains: document.getElementById('allowed-domains').value.split(',').map(d => d.trim()).filter(Boolean),
+    financeType: document.getElementById('finance-type').value,
+    seritiKey: document.getElementById('seriti-key').value.trim(),
+    seritiSecret: document.getElementById('seriti-secret').value.trim(),
     primary: document.getElementById('col-primary').value,
     gradEnd: document.getElementById('col-grad').value,
     label: document.getElementById('widget-label').value,
@@ -376,10 +397,14 @@ function getConfig() {
 function buildSummary() {
   const c = getConfig();
   document.getElementById('deploy-summary').innerHTML = [
-    ['Dealer', c.name], ['Key', c.key], ['Branch code', c.branch],
-    ['Domains', c.domains.join(', ')], ['Finance type', c.financeType], ['Primary colour', c.primary],
+    ['Dealer', c.name],
+    ['Key', c.key],
+    ['Branch code', c.branch],
+    ['Domains', c.domains.join(', ')],
+    ['Finance type', c.financeType],
+    ['Primary colour', c.primary],
     ['Repo', GH_ORG + '/e-fficient-ui-' + c.key],
-  ].map(([k,v]) => '<div class="summary-row"><span class="key">' + k + '</span><span class="val">' + v + '</span></div>').join('');
+  ].map(([k,v]) => '<div class="summary-row"><span class="key">' + k + '</span><span class="val">' + (v||'') + '</span></div>').join('');
 }
 
 async function ghApi(path, method, body) {
@@ -422,6 +447,8 @@ async function startDeploy() {
         label: c.label,
         tagline: c.tagline,
         financeType: c.financeType,
+        seritiKey: c.seritiKey,
+        seritiSecret: c.seritiSecret,
       }
     });
 
@@ -461,7 +488,7 @@ function copyText(srcId, btnId) {
 }
 
 function resetAll() {
-  ghToken = ''; cfToken = ''; cfAccountId = '';
+  ghToken = '';
   ['gh-token','dealer-name','dealer-key','branch-code','allowed-domains','seriti-key','seriti-secret','widget-label'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = id === 'widget-label' ? 'Check affordability' : '';

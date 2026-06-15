@@ -454,7 +454,7 @@ async function startDeploy() {
     setProgress(100, 'Done!');
     showStatus('Onboarding workflow triggered! Check GitHub Actions for progress (~3 minutes).', 'success');
 
-    const workerUrl = 'https://seritifinance.findndrive.co.za/dealer/' + c.key;
+    const workerUrl = 'https://' + c.key + '.seritifinance.findndrive.co.za';
     document.getElementById('script-mode1').textContent =
       '<!-- Add before </body> -->\n<script>\n  window.EfficientWidget = {\n    dealer: "' + c.key + '",\n    label: "' + c.label + '",\n    tagline: "' + c.tagline + '",\n    primaryColor: "' + c.primary + '"\n  };\n<\/script>\n<script src="' + workerUrl + '/widget.js"><\/script>';
 

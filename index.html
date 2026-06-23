@@ -59,15 +59,6 @@
   .color-row { display: flex; align-items: center; gap: 8px; }
   .color-row input[type=color] { width: 38px; height: 38px; padding: 2px 3px; border: 1px solid var(--gray-300); border-radius: var(--radius); cursor: pointer; background: white; }
   .color-row input[type=text] { flex: 1; }
-  .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--gray-100); }
-  .toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
-  .toggle-row span { font-size: 13px; color: var(--gray-700); }
-  .toggle { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
-  .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
-  .toggle-track { position: absolute; inset: 0; background: var(--gray-300); border-radius: 11px; cursor: pointer; transition: background 0.2s; }
-  .toggle input:checked ~ .toggle-track { background: var(--purple); }
-  .toggle-thumb { position: absolute; width: 16px; height: 16px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.2s; pointer-events: none; }
-  .toggle input:checked ~ .toggle-thumb { transform: translateX(18px); }
   .btn-row { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1.5rem; }
   button { font-family: inherit; cursor: pointer; border-radius: var(--radius); font-size: 13px; font-weight: 500; padding: 9px 18px; border: 1px solid var(--gray-300); background: white; color: var(--gray-700); transition: background 0.15s; }
   button:hover { background: var(--gray-50); }
@@ -205,40 +196,23 @@
   <div id="step3" style="display:none">
     <div class="card">
       <h3>🎨 Theme</h3>
-      <div class="grid2">
-        <div class="field">
-          <label>Primary colour</label>
-          <div class="color-row">
-            <input type="color" id="col-primary" value="#6C3FC5" oninput="syncCol('primary')" />
-            <input type="text" id="col-primary-txt" value="#6C3FC5" oninput="syncColTxt('primary')" placeholder="#6C3FC5" />
-          </div>
-        </div>
-        <div class="field">
-          <label>Gradient end colour</label>
-          <div class="color-row">
-            <input type="color" id="col-grad" value="#C026D3" oninput="syncCol('grad')" />
-            <input type="text" id="col-grad-txt" value="#C026D3" oninput="syncColTxt('grad')" placeholder="#C026D3" />
-          </div>
-        </div>
-      </div>
       <div class="field">
-        <label>Widget CTA label</label>
-        <input type="text" id="widget-label" value="Check affordability" oninput="updatePreview()" />
-      </div>
-      <div class="field">
-        <label>Widget tagline</label>
-        <input type="text" id="widget-tagline" value="Find out what you can qualify for in 60 seconds. No credit impact." />
+        <label>Primary colour</label>
+        <div class="color-row">
+          <input type="color" id="col-primary" value="#6C3FC5" oninput="syncCol('primary')" />
+          <input type="text" id="col-primary-txt" value="#6C3FC5" oninput="syncColTxt('primary')" placeholder="#6C3FC5" />
+        </div>
       </div>
     </div>
     <div class="card">
       <h3>Preview</h3>
       <div class="preview-area">
         <div class="fab-preview" style="background:white; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
-          <div class="fab-icon" id="fab-icon" style="background: linear-gradient(135deg,#6C3FC5,#C026D3)">
+          <div class="fab-icon" id="fab-icon" style="background: linear-gradient(135deg,#6C3FC5,#6C3FC5)">
             <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
           </div>
           <div>
-            <div class="fab-text-label" id="fab-label-preview">Check affordability</div>
+            <div class="fab-text-label">Check affordability</div>
             <div class="fab-text-tag">Find out what you can qualify for in 60 seconds.</div>
           </div>
         </div>
@@ -357,9 +331,9 @@ function validateDetails() {
   const key = document.getElementById('dealer-key').value.trim();
   const branch = document.getElementById('branch-code').value.trim();
   const domains = document.getElementById('allowed-domains').value.trim();
+  const contactEmail = document.getElementById('contact-email').value.trim();
   const seritiKey = document.getElementById('seriti-key').value.trim();
   const seritiSecret = document.getElementById('seriti-secret').value.trim();
-  const contactEmail = document.getElementById('contact-email').value.trim();
   if (!name || !key || !branch || !domains) { showStatus('Please fill in all required fields.', 'error'); return; }
   if (!contactEmail) { showStatus('Please enter a contact email address.', 'error'); return; }
   if (!seritiKey || !seritiSecret) { showStatus('Please enter Seriti API credentials.', 'error'); return; }
@@ -377,9 +351,7 @@ function syncColTxt(type) {
 }
 function updatePreview() {
   const p = document.getElementById('col-primary').value;
-  const g = document.getElementById('col-grad').value;
-  document.getElementById('fab-icon').style.background = 'linear-gradient(135deg,' + p + ',' + g + ')';
-  document.getElementById('fab-label-preview').textContent = document.getElementById('widget-label').value;
+  document.getElementById('fab-icon').style.background = 'linear-gradient(135deg,' + p + ',' + p + ')';
 }
 
 function getConfig() {
@@ -393,9 +365,6 @@ function getConfig() {
     seritiKey: document.getElementById('seriti-key').value.trim(),
     seritiSecret: document.getElementById('seriti-secret').value.trim(),
     primary: document.getElementById('col-primary').value,
-    gradEnd: document.getElementById('col-grad').value,
-    label: document.getElementById('widget-label').value,
-    tagline: document.getElementById('widget-tagline').value,
   };
 }
 
@@ -447,8 +416,6 @@ async function startDeploy() {
         branch: c.branch,
         domains: c.domains,
         primary: c.primary,
-        label: c.label,
-        tagline: c.tagline,
         financeType: c.financeType,
         contactEmail: c.contactEmail,
         seritiKey: c.seritiKey,
@@ -461,7 +428,7 @@ async function startDeploy() {
 
     const workerUrl = 'https://' + c.key + '.seritifinance.findndrive.co.za';
     document.getElementById('script-mode1').textContent =
-      '<!-- Add before </body> -->\n<script>\n  window.EfficientWidget = {\n    dealer: "' + c.key + '",\n    label: "' + c.label + '",\n    tagline: "' + c.tagline + '",\n    primaryColor: "' + c.primary + '"\n  };\n<\/script>\n<script src="' + workerUrl + '/widget.js"><\/script>';
+      '<!-- Add before </body> -->\n<script>\n  window.EfficientWidget = {\n    dealer: "' + c.key + '",\n    label: "Check affordability",\n    tagline: "Find out what you can qualify for in 60 seconds. No credit impact.",\n    primaryColor: "' + c.primary + '"\n  };\n<\/script>\n<script src="' + workerUrl + '/widget.js"><\/script>';
 
     document.getElementById('script-mode2').textContent =
       '<a href="' + workerUrl + '/?dealer=' + c.key + '&make=MAKE&model=MODEL&mm=MM_CODE"\n   target="_blank"\n   style="display:inline-block;padding:12px 24px;background:' + c.primary + ';color:#fff;border-radius:50px;font-family:sans-serif;text-decoration:none;">\n  Apply for finance\n</a>';
@@ -480,7 +447,7 @@ function buildWorkflow(key) {
 }
 
 function buildDealerConfig(c) {
-  return 'export interface DealerTheme {\n  primary?: string;\n  primaryLight?: string;\n  primaryDark?: string;\n  gradient?: string;\n  fontFamily?: string;\n  borderRadius?: string;\n  logoUrl?: string;\n}\n\nexport interface DealerFeatures {\n  showDeposit: boolean;\n  showCurrentFinance: boolean;\n  vehicleQueryParams: boolean;\n}\n\nexport interface DealerEntry {\n  name: string;\n  branchCode: string;\n  allowedDomains: string[];\n  mixpanelToken?: string;\n  theme: DealerTheme;\n  features: DealerFeatures;\n}\n\nexport interface DealerConfig {\n  key: string;\n  name: string;\n  branchCode: string;\n  allowedDomains: string[];\n  mixpanelToken?: string;\n  theme: DealerTheme;\n  features: DealerFeatures;\n}\n\nexport const DEALERS: Record<string, DealerEntry> = {\n  \'' + c.key + '\': {\n    name: \'' + c.name + '\',\n    branchCode: \'' + c.branch + '\',\n    allowedDomains: [' + c.domains.map(d => "'" + d + "'").join(', ') + '],\n    mixpanelToken: \'' + c.mixpanel + '\',\n    theme: {\n      primary: \'' + c.primary + '\',\n      gradient: \'linear-gradient(135deg, ' + c.primary + ' 0%, ' + c.gradEnd + ' 100%)\',\n      fontFamily: "\'Inter\', sans-serif",\n      borderRadius: \'12px\',\n    },\n    features: {\n      showDeposit: ' + c.showDeposit + ',\n      showCurrentFinance: ' + c.showFinance + ',\n      vehicleQueryParams: ' + c.showParams + ',\n    },\n  },\n};\n\nexport const DEFAULT_DEALER_KEY = \'' + c.key + '\';\n\nexport function getDealerConfig(key?: string): DealerConfig {\n  const resolved = key && DEALERS[key] ? key : DEFAULT_DEALER_KEY;\n  const entry = DEALERS[resolved] ?? DEALERS[DEFAULT_DEALER_KEY];\n  return { key: resolved, ...entry };\n}\n';
+  return 'export interface DealerTheme {\n  primary?: string;\n  primaryLight?: string;\n  primaryDark?: string;\n  gradient?: string;\n  fontFamily?: string;\n  borderRadius?: string;\n  logoUrl?: string;\n}\n\nexport interface DealerFeatures {\n  showDeposit: boolean;\n  showCurrentFinance: boolean;\n  vehicleQueryParams: boolean;\n}\n\nexport interface DealerEntry {\n  name: string;\n  branchCode: string;\n  allowedDomains: string[];\n  theme: DealerTheme;\n  features: DealerFeatures;\n}\n\nexport interface DealerConfig {\n  key: string;\n  name: string;\n  branchCode: string;\n  allowedDomains: string[];\n  theme: DealerTheme;\n  features: DealerFeatures;\n}\n\nexport const DEALERS: Record<string, DealerEntry> = {\n  \'' + c.key + '\': {\n    name: \'' + c.name + '\',\n    branchCode: \'' + c.branch + '\',\n    allowedDomains: [' + c.domains.map(d => "'" + d + "'").join(', ') + '],\n    theme: {\n      primary: \'' + c.primary + '\',\n      gradient: \'linear-gradient(135deg, ' + c.primary + ' 0%, ' + c.primary + ' 100%)\',\n      fontFamily: "\'Inter\', sans-serif",\n      borderRadius: \'12px\',\n    },\n    features: {\n      showDeposit: true,\n      showCurrentFinance: true,\n      vehicleQueryParams: true,\n    },\n  },\n};\n\nexport const DEFAULT_DEALER_KEY = \'' + c.key + '\';\n\nexport function getDealerConfig(key?: string): DealerConfig {\n  const resolved = key && DEALERS[key] ? key : DEFAULT_DEALER_KEY;\n  const entry = DEALERS[resolved] ?? DEALERS[DEFAULT_DEALER_KEY];\n  return { key: resolved, ...entry };\n}\n';
 }
 
 function copyText(srcId, btnId) {
@@ -492,14 +459,12 @@ function copyText(srcId, btnId) {
 
 function resetAll() {
   ghToken = '';
-  ['gh-token','dealer-name','dealer-key','branch-code','allowed-domains','contact-email','seriti-key','seriti-secret','widget-label'].forEach(id => {
+  ['gh-token','dealer-name','dealer-key','branch-code','allowed-domains','contact-email','seriti-key','seriti-secret'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.value = id === 'widget-label' ? 'Check affordability' : '';
+    if (el) el.value = '';
   });
   document.getElementById('col-primary').value = '#6C3FC5';
   document.getElementById('col-primary-txt').value = '#6C3FC5';
-  document.getElementById('col-grad').value = '#C026D3';
-  document.getElementById('col-grad-txt').value = '#C026D3';
   document.getElementById('progress-wrap').classList.remove('show');
   document.getElementById('deploy-btn').disabled = false;
   goTo(1);

@@ -132,7 +132,6 @@
         </div>
         <div class="hint">Needs repo + workflow + admin:org scopes. Session only — never stored.</div>
       </div>
-
     </div>
     <div class="btn-row">
       <button class="btn-primary" onclick="validateAuth()">Continue →</button>
@@ -171,6 +170,11 @@
         </select>
         <div class="hint">Controls transaction type sent to Edith.</div>
       </div>
+      <div class="field">
+        <label>Contact email *</label>
+        <input type="email" id="contact-email" placeholder="e.g. finance@dealership.co.za" />
+        <div class="hint">Used for failure notifications when Edith is unreachable.</div>
+      </div>
     </div>
     <div class="card">
       <h3>🔑 Seriti API credentials</h3>
@@ -191,7 +195,6 @@
         <div class="hint">Unique per dealer — stored securely in Cloudflare KV.</div>
       </div>
     </div>
-
     <div class="btn-row">
       <button onclick="goTo(1)">← Back</button>
       <button class="btn-primary" onclick="validateDetails()">Continue →</button>
@@ -265,7 +268,6 @@
 
   <!-- Step 5: Scripts -->
   <div id="step5" style="display:none">
-
     <div class="card">
       <h3>✅ Deployment complete</h3>
       <p style="font-size:13px;color:var(--gray-500);margin-bottom:1rem;">Share these script tags with the dealer. They paste them before <code style="background:var(--gray-100);padding:2px 6px;border-radius:4px;">&lt;/body&gt;</code> on their website.</p>
@@ -357,7 +359,9 @@ function validateDetails() {
   const domains = document.getElementById('allowed-domains').value.trim();
   const seritiKey = document.getElementById('seriti-key').value.trim();
   const seritiSecret = document.getElementById('seriti-secret').value.trim();
+  const contactEmail = document.getElementById('contact-email').value.trim();
   if (!name || !key || !branch || !domains) { showStatus('Please fill in all required fields.', 'error'); return; }
+  if (!contactEmail) { showStatus('Please enter a contact email address.', 'error'); return; }
   if (!seritiKey || !seritiSecret) { showStatus('Please enter Seriti API credentials.', 'error'); return; }
   if (!/^[a-z0-9-]+$/.test(key)) { showStatus('Dealer key must be lowercase letters, numbers and hyphens only.', 'error'); return; }
   goTo(3);
@@ -385,6 +389,7 @@ function getConfig() {
     branch: document.getElementById('branch-code').value.trim(),
     domains: document.getElementById('allowed-domains').value.split(',').map(d => d.trim()).filter(Boolean),
     financeType: document.getElementById('finance-type').value,
+    contactEmail: document.getElementById('contact-email').value.trim(),
     seritiKey: document.getElementById('seriti-key').value.trim(),
     seritiSecret: document.getElementById('seriti-secret').value.trim(),
     primary: document.getElementById('col-primary').value,
@@ -402,6 +407,7 @@ function buildSummary() {
     ['Branch code', c.branch],
     ['Domains', c.domains.join(', ')],
     ['Finance type', c.financeType],
+    ['Contact email', c.contactEmail],
     ['Primary colour', c.primary],
     ['Repo', GH_ORG + '/e-fficient-ui-' + c.key],
   ].map(([k,v]) => '<div class="summary-row"><span class="key">' + k + '</span><span class="val">' + (v||'') + '</span></div>').join('');
@@ -424,8 +430,6 @@ async function ghApi(path, method, body) {
   return data;
 }
 
-
-
 async function startDeploy() {
   const c = getConfig();
   document.getElementById('deploy-btn').disabled = true;
@@ -446,6 +450,7 @@ async function startDeploy() {
         label: c.label,
         tagline: c.tagline,
         financeType: c.financeType,
+        contactEmail: c.contactEmail,
         seritiKey: c.seritiKey,
         seritiSecret: c.seritiSecret,
       }
@@ -470,7 +475,6 @@ async function startDeploy() {
   }
 }
 
-
 function buildWorkflow(key) {
   return 'name: Deploy to Cloudflare Workers\n\non:\n  push:\n    branches: [main]\n  workflow_dispatch:\n\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n\n      - uses: oven-sh/setup-bun@v1\n        with:\n          bun-version: latest\n\n      - name: Install dependencies\n        run: bun install --ignore-scripts\n\n      - name: Build\n        run: bun run build\n        env:\n          VITE_WORKER_URL: https://efficient-finance-widget.still-fire-1c3d.workers.dev\n          VITE_DEFAULT_DEALER: ' + key + '\n\n      - name: Deploy to Cloudflare Workers\n        run: npx wrangler deploy\n        env:\n          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}\n          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}\n';
 }
@@ -488,7 +492,7 @@ function copyText(srcId, btnId) {
 
 function resetAll() {
   ghToken = '';
-  ['gh-token','dealer-name','dealer-key','branch-code','allowed-domains','seriti-key','seriti-secret','widget-label'].forEach(id => {
+  ['gh-token','dealer-name','dealer-key','branch-code','allowed-domains','contact-email','seriti-key','seriti-secret','widget-label'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = id === 'widget-label' ? 'Check affordability' : '';
   });

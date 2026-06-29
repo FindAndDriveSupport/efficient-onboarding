@@ -153,13 +153,23 @@
         <label>Allowed domains * <span style="font-weight:400;color:var(--gray-400)">(comma separated)</span></label>
         <input type="text" id="allowed-domains" placeholder="northwesternmotors.co.za, www.northwesternmotors.co.za" />
       </div>
-      <div class="field">
-        <label>Finance type *</label>
-        <select id="finance-type">
-          <option value="vehicle">Vehicle</option>
-          <option value="bike">Bike</option>
-        </select>
-        <div class="hint">Controls transaction type sent to Edith.</div>
+      <div class="grid2">
+        <div class="field">
+          <label>Finance type *</label>
+          <select id="finance-type">
+            <option value="vehicle">Vehicle</option>
+            <option value="bike">Bike</option>
+          </select>
+          <div class="hint">Controls transaction type sent to Edith.</div>
+        </div>
+        <div class="field">
+          <label>Billing type *</label>
+          <select id="billing-type">
+            <option value="transaction">Transaction</option>
+            <option value="fixed">Fixed branch fee</option>
+          </select>
+          <div class="hint">How this dealer is billed by FindAndDrive.</div>
+        </div>
       </div>
       <div class="field">
         <label>Contact email *</label>
@@ -361,6 +371,7 @@ function getConfig() {
     branch: document.getElementById('branch-code').value.trim(),
     domains: document.getElementById('allowed-domains').value.split(',').map(d => d.trim()).filter(Boolean),
     financeType: document.getElementById('finance-type').value,
+    billingType: document.getElementById('billing-type').value,
     contactEmail: document.getElementById('contact-email').value.trim(),
     seritiKey: document.getElementById('seriti-key').value.trim(),
     seritiSecret: document.getElementById('seriti-secret').value.trim(),
@@ -376,6 +387,7 @@ function buildSummary() {
     ['Branch code', c.branch],
     ['Domains', c.domains.join(', ')],
     ['Finance type', c.financeType],
+    ['Billing type', c.billingType],
     ['Contact email', c.contactEmail],
     ['Primary colour', c.primary],
     ['Repo', GH_ORG + '/e-fficient-ui-' + c.key],
@@ -417,6 +429,7 @@ async function startDeploy() {
         domains: c.domains,
         primary: c.primary,
         financeType: c.financeType,
+        billingType: c.billingType,
         contactEmail: c.contactEmail,
         seritiKey: c.seritiKey,
         seritiSecret: c.seritiSecret,
@@ -440,14 +453,6 @@ async function startDeploy() {
     document.getElementById('deploy-btn').disabled = false;
     setProgress(0, '');
   }
-}
-
-function buildWorkflow(key) {
-  return 'name: Deploy to Cloudflare Workers\n\non:\n  push:\n    branches: [main]\n  workflow_dispatch:\n\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n\n      - uses: oven-sh/setup-bun@v1\n        with:\n          bun-version: latest\n\n      - name: Install dependencies\n        run: bun install --ignore-scripts\n\n      - name: Build\n        run: bun run build\n        env:\n          VITE_WORKER_URL: https://efficient-finance-widget.still-fire-1c3d.workers.dev\n          VITE_DEFAULT_DEALER: ' + key + '\n\n      - name: Deploy to Cloudflare Workers\n        run: npx wrangler deploy\n        env:\n          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}\n          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}\n';
-}
-
-function buildDealerConfig(c) {
-  return 'export interface DealerTheme {\n  primary?: string;\n  primaryLight?: string;\n  primaryDark?: string;\n  gradient?: string;\n  fontFamily?: string;\n  borderRadius?: string;\n  logoUrl?: string;\n}\n\nexport interface DealerFeatures {\n  showDeposit: boolean;\n  showCurrentFinance: boolean;\n  vehicleQueryParams: boolean;\n}\n\nexport interface DealerEntry {\n  name: string;\n  branchCode: string;\n  allowedDomains: string[];\n  theme: DealerTheme;\n  features: DealerFeatures;\n}\n\nexport interface DealerConfig {\n  key: string;\n  name: string;\n  branchCode: string;\n  allowedDomains: string[];\n  theme: DealerTheme;\n  features: DealerFeatures;\n}\n\nexport const DEALERS: Record<string, DealerEntry> = {\n  \'' + c.key + '\': {\n    name: \'' + c.name + '\',\n    branchCode: \'' + c.branch + '\',\n    allowedDomains: [' + c.domains.map(d => "'" + d + "'").join(', ') + '],\n    theme: {\n      primary: \'' + c.primary + '\',\n      gradient: \'linear-gradient(135deg, ' + c.primary + ' 0%, ' + c.primary + ' 100%)\',\n      fontFamily: "\'Inter\', sans-serif",\n      borderRadius: \'12px\',\n    },\n    features: {\n      showDeposit: true,\n      showCurrentFinance: true,\n      vehicleQueryParams: true,\n    },\n  },\n};\n\nexport const DEFAULT_DEALER_KEY = \'' + c.key + '\';\n\nexport function getDealerConfig(key?: string): DealerConfig {\n  const resolved = key && DEALERS[key] ? key : DEFAULT_DEALER_KEY;\n  const entry = DEALERS[resolved] ?? DEALERS[DEFAULT_DEALER_KEY];\n  return { key: resolved, ...entry };\n}\n';
 }
 
 function copyText(srcId, btnId) {

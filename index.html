@@ -65,6 +65,8 @@
   button:disabled { opacity: 0.5; cursor: not-allowed; }
   .btn-primary { background: var(--purple); color: white; border-color: var(--purple); }
   .btn-primary:hover { background: var(--purple-light); border-color: var(--purple-light); }
+  .btn-danger { color: var(--error); border-color: var(--error-border); }
+  .btn-danger:hover { background: var(--error-bg); }
   .status { padding: 10px 14px; border-radius: var(--radius); font-size: 13px; margin-bottom: 14px; display: none; }
   .status.info { display: block; background: var(--info-bg); color: var(--info); border: 1px solid var(--info-border); }
   .status.success { display: block; background: var(--success-bg); color: var(--success); border: 1px solid var(--success-border); }
@@ -88,6 +90,17 @@
   .summary-row:last-child { border-bottom: none; }
   .summary-row .key { color: var(--gray-500); min-width: 130px; flex-shrink: 0; }
   .summary-row .val { color: var(--gray-800); font-weight: 500; }
+  .setup-options { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  .setup-option { border: 1.5px solid var(--gray-200); border-radius: var(--radius-lg); padding: 14px 16px; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+  .setup-option:hover { border-color: var(--purple); background: var(--gray-50); }
+  .setup-option.selected { border-color: var(--purple); background: #f5f0ff; }
+  .setup-option input[type=radio] { display: none; }
+  .setup-option-title { font-size: 13px; font-weight: 600; color: var(--gray-900); margin-bottom: 3px; }
+  .setup-option-desc { font-size: 12px; color: var(--gray-500); }
+  .branch-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; margin-bottom: 8px; align-items: center; }
+  .branch-row input { height: 38px; padding: 0 12px; border: 1px solid var(--gray-300); border-radius: var(--radius); font-size: 13px; color: var(--gray-900); background: white; outline: none; }
+  .branch-row input:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(108,63,197,0.1); }
+  .info-banner { background: var(--info-bg); border: 1px solid var(--info-border); border-radius: var(--radius); padding: 12px 14px; font-size: 13px; color: var(--info); margin-bottom: 14px; }
 </style>
 </head>
 <body>
@@ -100,13 +113,15 @@
   <div class="steps">
     <div class="step active" id="s1"><div class="step-dot">1</div><div class="step-label">Auth</div></div>
     <div class="step-line"></div>
-    <div class="step" id="s2v"><div class="step-dot">2</div><div class="step-label">Details</div></div>
+    <div class="step" id="s2v"><div class="step-dot">2</div><div class="step-label">Setup</div></div>
     <div class="step-line"></div>
-    <div class="step" id="s3v"><div class="step-dot">3</div><div class="step-label">Theme</div></div>
+    <div class="step" id="s3v"><div class="step-dot">3</div><div class="step-label">Details</div></div>
     <div class="step-line"></div>
-    <div class="step" id="s4v"><div class="step-dot">4</div><div class="step-label">Deploy</div></div>
+    <div class="step" id="s4v"><div class="step-dot">4</div><div class="step-label">Theme</div></div>
     <div class="step-line"></div>
-    <div class="step" id="s5v"><div class="step-dot">5</div><div class="step-label">Scripts</div></div>
+    <div class="step" id="s5v"><div class="step-dot">5</div><div class="step-label">Deploy</div></div>
+    <div class="step-line"></div>
+    <div class="step" id="s6v"><div class="step-dot">6</div><div class="step-label">Scripts</div></div>
   </div>
 
   <div id="statusMsg" class="status"></div>
@@ -129,29 +144,74 @@
     </div>
   </div>
 
-  <!-- Step 2: Dealer Details -->
+  <!-- Step 2: Setup Type -->
   <div id="step2" style="display:none">
+    <div class="card">
+      <h3>🏗️ Dealer setup type</h3>
+      <p style="font-size:13px;color:var(--gray-500);margin-bottom:1rem;">Select how this dealer is structured. This determines how the widget is deployed and how branches are managed.</p>
+      <div class="setup-options">
+        <label class="setup-option selected" id="opt-single" onclick="selectSetup('single')">
+          <input type="radio" name="setup-type" value="single" checked />
+          <div class="setup-option-title">🏪 Single website, single branch</div>
+          <div class="setup-option-desc">One domain, one Edith branch code. Standard deployment — most dealers.</div>
+        </label>
+        <label class="setup-option" id="opt-multi-branch" onclick="selectSetup('multi-branch')">
+          <input type="radio" name="setup-type" value="multi-branch" />
+          <div class="setup-option-title">🏪🔀 Single website, multiple branches</div>
+          <div class="setup-option-desc">One domain, multiple Edith branch codes. User selects their branch from a dropdown on the application form.</div>
+        </label>
+        <label class="setup-option" id="opt-multi-site" onclick="selectSetup('multi-site')">
+          <input type="radio" name="setup-type" value="multi-site" />
+          <div class="setup-option-title">🏪🏪 Multiple websites, multiple branches</div>
+          <div class="setup-option-desc">Each branch has its own website and widget. Run onboarding separately for each branch.</div>
+        </label>
+      </div>
+      <div id="multi-site-banner" style="display:none;margin-top:1rem;">
+        <div class="info-banner">
+          ℹ️ For multiple websites with multiple branches, onboard each branch separately. Each gets its own dealer key, domain, and widget deployment. Continue below to onboard the first branch.
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button onclick="goTo(1)">← Back</button>
+      <button class="btn-primary" onclick="goTo(3)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Dealer Details -->
+  <div id="step3" style="display:none">
     <div class="card">
       <h3>🏪 Dealer details</h3>
       <div class="field">
         <label>Dealer name *</label>
-        <input type="text" id="dealer-name" placeholder="e.g. North Western Ford" oninput="autoKey()" />
+        <input type="text" id="dealer-name" placeholder="e.g. GFI Motors" oninput="autoKey()" />
       </div>
       <div class="grid2">
         <div class="field">
           <label>Dealer key *</label>
-          <input type="text" id="dealer-key" placeholder="e.g. north-western-ford" />
+          <input type="text" id="dealer-key" placeholder="e.g. gfi-motors" />
           <div class="hint">Auto-generated. Lowercase + hyphens only.</div>
         </div>
-        <div class="field">
+        <div id="single-branch-field" class="field">
           <label>Branch code *</label>
-          <input type="text" id="branch-code" placeholder="e.g. NWMC001" />
+          <input type="text" id="branch-code" placeholder="e.g. GFIM001" />
           <div class="hint">Edith branch code.</div>
         </div>
       </div>
+
+      <!-- Multi-branch section -->
+      <div id="multi-branch-section" style="display:none">
+        <div class="field">
+          <label>Branches * <span style="font-weight:400;color:var(--gray-400)">— add each branch below</span></label>
+          <div id="branch-list"></div>
+          <button type="button" onclick="addBranch()" style="margin-top:8px;font-size:12px;padding:6px 14px;">+ Add branch</button>
+          <div class="hint">First branch becomes the default. Each branch gets its own Edith branch code.</div>
+        </div>
+      </div>
+
       <div class="field">
         <label>Allowed domains * <span style="font-weight:400;color:var(--gray-400)">(comma separated)</span></label>
-        <input type="text" id="allowed-domains" placeholder="northwesternmotors.co.za, www.northwesternmotors.co.za" />
+        <input type="text" id="allowed-domains" placeholder="gfimotors.co.za, www.gfimotors.co.za" />
       </div>
       <div class="grid2">
         <div class="field">
@@ -197,13 +257,13 @@
       </div>
     </div>
     <div class="btn-row">
-      <button onclick="goTo(1)">← Back</button>
+      <button onclick="goTo(2)">← Back</button>
       <button class="btn-primary" onclick="validateDetails()">Continue →</button>
     </div>
   </div>
 
-  <!-- Step 3: Theme -->
-  <div id="step3" style="display:none">
+  <!-- Step 4: Theme -->
+  <div id="step4" style="display:none">
     <div class="card">
       <h3>🎨 Theme</h3>
       <div class="field">
@@ -229,13 +289,13 @@
       </div>
     </div>
     <div class="btn-row">
-      <button onclick="goTo(2)">← Back</button>
-      <button class="btn-primary" onclick="goTo(4)">Continue →</button>
+      <button onclick="goTo(3)">← Back</button>
+      <button class="btn-primary" onclick="goTo(5)">Continue →</button>
     </div>
   </div>
 
-  <!-- Step 4: Deploy -->
-  <div id="step4" style="display:none">
+  <!-- Step 5: Deploy -->
+  <div id="step5" style="display:none">
     <div class="card">
       <h3>🚀 Ready to deploy</h3>
       <div id="deploy-summary"></div>
@@ -245,13 +305,13 @@
       <div class="progress-label" id="prog-label">Starting...</div>
     </div>
     <div class="btn-row">
-      <button onclick="goTo(3)">← Back</button>
+      <button onclick="goTo(4)">← Back</button>
       <button class="btn-primary" id="deploy-btn" onclick="startDeploy()">🚀 Deploy</button>
     </div>
   </div>
 
-  <!-- Step 5: Scripts -->
-  <div id="step5" style="display:none">
+  <!-- Step 6: Scripts -->
+  <div id="step6" style="display:none">
     <div class="card">
       <h3>✅ Deployment complete</h3>
       <p style="font-size:13px;color:var(--gray-500);margin-bottom:1rem;">Share these script tags with the dealer. They paste them before <code style="background:var(--gray-100);padding:2px 6px;border-radius:4px;">&lt;/body&gt;</code> on their website.</p>
@@ -278,9 +338,10 @@ const BACKEND_REPO = 'efficient-finance-widget';
 const TEMPLATE_REPO = 'e-fficient-ui';
 const BACKEND_FILE = 'workers/dealers/dealers.config.js';
 const ORCHESTRATOR_REPO = 'onboarding-orchestrator';
-const PROXY_URL = 'https://onboarding-proxy.still-fire-1c3d.workers.dev';
 
 let ghToken = '';
+let setupType = 'single';
+let branchCount = 0;
 
 function showStatus(msg, type) {
   const el = document.getElementById('statusMsg');
@@ -301,18 +362,38 @@ function setProgress(pct, label) {
   document.getElementById('prog-label').textContent = label;
 }
 
+function selectSetup(type) {
+  setupType = type;
+  ['single', 'multi-branch', 'multi-site'].forEach(t => {
+    document.getElementById('opt-' + t).classList.toggle('selected', t === type);
+  });
+  document.getElementById('multi-site-banner').style.display = type === 'multi-site' ? 'block' : 'none';
+}
+
 function goTo(step) {
-  [1,2,3,4,5].forEach(i => {
+  [1,2,3,4,5,6].forEach(i => {
     document.getElementById('step' + i).style.display = i === step ? 'block' : 'none';
   });
-  ['s1','s2v','s3v','s4v','s5v'].forEach((id, idx) => {
+  ['s1','s2v','s3v','s4v','s5v','s6v'].forEach((id, idx) => {
     const n = idx + 1;
     const el = document.getElementById(id);
     el.className = 'step' + (n === step ? ' active' : n < step ? ' done' : '');
     el.querySelector('.step-dot').textContent = n < step ? '✓' : n;
   });
   clearStatus();
-  if (step === 4) buildSummary();
+
+  // Show/hide branch fields based on setup type
+  if (step === 3) {
+    const isMulti = setupType === 'multi-branch';
+    document.getElementById('single-branch-field').style.display = isMulti ? 'none' : 'block';
+    document.getElementById('multi-branch-section').style.display = isMulti ? 'block' : 'none';
+    if (isMulti && document.getElementById('branch-list').children.length === 0) {
+      addBranch();
+      addBranch();
+    }
+  }
+
+  if (step === 5) buildSummary();
 }
 
 async function validateAuth() {
@@ -336,19 +417,63 @@ function autoKey() {
   document.getElementById('dealer-key').value = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
+// ── Branch management ──────────────────────────────────────────
+
+function addBranch() {
+  branchCount++;
+  const id = branchCount;
+  const div = document.createElement('div');
+  div.id = 'branch-row-' + id;
+  div.className = 'branch-row';
+  div.innerHTML = `
+    <input type="text" placeholder="Branch name (e.g. Sandton)" id="branch-name-${id}" />
+    <input type="text" placeholder="Branch code (e.g. GFIM001)" id="branch-code-${id}" oninput="this.value=this.value.toUpperCase()" />
+    <button type="button" class="btn-danger" onclick="removeBranch(${id})" style="padding:0 10px;height:38px;">✕</button>
+  `;
+  document.getElementById('branch-list').appendChild(div);
+}
+
+function removeBranch(id) {
+  document.getElementById('branch-row-' + id)?.remove();
+}
+
+function getBranches() {
+  if (setupType !== 'multi-branch') return null;
+  const branches = [];
+  document.querySelectorAll('[id^="branch-row-"]').forEach(row => {
+    const id = row.id.replace('branch-row-', '');
+    const name = document.getElementById('branch-name-' + id)?.value.trim();
+    const code = document.getElementById('branch-code-' + id)?.value.trim().toUpperCase();
+    if (name && code) branches.push({ name, code });
+  });
+  return branches.length > 0 ? branches : null;
+}
+
 function validateDetails() {
   const name = document.getElementById('dealer-name').value.trim();
   const key = document.getElementById('dealer-key').value.trim();
-  const branch = document.getElementById('branch-code').value.trim();
   const domains = document.getElementById('allowed-domains').value.trim();
   const contactEmail = document.getElementById('contact-email').value.trim();
   const seritiKey = document.getElementById('seriti-key').value.trim();
   const seritiSecret = document.getElementById('seriti-secret').value.trim();
-  if (!name || !key || !branch || !domains) { showStatus('Please fill in all required fields.', 'error'); return; }
+
+  if (!name || !key || !domains) { showStatus('Please fill in all required fields.', 'error'); return; }
   if (!contactEmail) { showStatus('Please enter a contact email address.', 'error'); return; }
   if (!seritiKey || !seritiSecret) { showStatus('Please enter Seriti API credentials.', 'error'); return; }
   if (!/^[a-z0-9-]+$/.test(key)) { showStatus('Dealer key must be lowercase letters, numbers and hyphens only.', 'error'); return; }
-  goTo(3);
+
+  if (setupType === 'multi-branch') {
+    const branches = getBranches();
+    if (!branches || branches.length < 2) {
+      showStatus('Please add at least two branches for a multi-branch setup.', 'error');
+      return;
+    }
+  } else {
+    const branch = document.getElementById('branch-code').value.trim();
+    if (!branch) { showStatus('Branch code is required.', 'error'); return; }
+  }
+
+  goTo(4);
 }
 
 function syncCol(type) {
@@ -365,10 +490,14 @@ function updatePreview() {
 }
 
 function getConfig() {
+  const branches = getBranches();
+  const isMulti = setupType === 'multi-branch';
   return {
     key: document.getElementById('dealer-key').value.trim(),
     name: document.getElementById('dealer-name').value.trim(),
-    branch: document.getElementById('branch-code').value.trim(),
+    branch: isMulti ? (branches?.[0]?.code || '') : document.getElementById('branch-code').value.trim(),
+    branches: branches,
+    setupType: setupType,
     domains: document.getElementById('allowed-domains').value.split(',').map(d => d.trim()).filter(Boolean),
     financeType: document.getElementById('finance-type').value,
     billingType: document.getElementById('billing-type').value,
@@ -381,10 +510,14 @@ function getConfig() {
 
 function buildSummary() {
   const c = getConfig();
+  const branchSummary = c.branches
+    ? c.branches.map(b => b.name + ' (' + b.code + ')').join(', ')
+    : c.branch;
   document.getElementById('deploy-summary').innerHTML = [
     ['Dealer', c.name],
     ['Key', c.key],
-    ['Branch code', c.branch],
+    ['Setup', c.setupType === 'multi-branch' ? 'Single website, multiple branches' : c.setupType === 'multi-site' ? 'Multiple websites, multiple branches' : 'Single website, single branch'],
+    ['Branches', branchSummary],
     ['Domains', c.domains.join(', ')],
     ['Finance type', c.financeType],
     ['Billing type', c.billingType],
@@ -426,6 +559,8 @@ async function startDeploy() {
         key: c.key,
         name: c.name,
         branch: c.branch,
+        branches: c.branches,
+        setupType: c.setupType,
         domains: c.domains,
         primary: c.primary,
         financeType: c.financeType,
@@ -446,7 +581,7 @@ async function startDeploy() {
     document.getElementById('script-mode2').textContent =
       '<a href="' + workerUrl + '/?dealer=' + c.key + '&make=MAKE&model=MODEL&mm=MM_CODE"\n   target="_blank"\n   style="display:inline-block;padding:12px 24px;background:' + c.primary + ';color:#fff;border-radius:50px;font-family:sans-serif;text-decoration:none;">\n  Apply for finance\n</a>';
 
-    setTimeout(() => goTo(5), 800);
+    setTimeout(() => goTo(6), 800);
 
   } catch (err) {
     showStatus('Deploy failed: ' + err.message, 'error');
@@ -464,14 +599,18 @@ function copyText(srcId, btnId) {
 
 function resetAll() {
   ghToken = '';
+  setupType = 'single';
+  branchCount = 0;
   ['gh-token','dealer-name','dealer-key','branch-code','allowed-domains','contact-email','seriti-key','seriti-secret'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
+  document.getElementById('branch-list').innerHTML = '';
   document.getElementById('col-primary').value = '#6C3FC5';
   document.getElementById('col-primary-txt').value = '#6C3FC5';
   document.getElementById('progress-wrap').classList.remove('show');
   document.getElementById('deploy-btn').disabled = false;
+  selectSetup('single');
   goTo(1);
 }
 </script>

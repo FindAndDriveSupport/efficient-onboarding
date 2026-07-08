@@ -236,6 +236,13 @@
         <input type="email" id="contact-email" placeholder="e.g. finance@dealership.co.za" />
         <div class="hint">Used for failure notifications when Edith is unreachable.</div>
       </div>
+      <div class="field">
+        <label style="display:flex;align-items:center;gap:8px;font-weight:400;cursor:pointer;">
+          <input type="checkbox" id="show-vehicle-selection" style="width:auto;height:auto;" />
+          Show vehicle selection page
+        </label>
+        <div class="hint">Adds a step before the application form where users pick a vehicle make and model. Pre-fills these fields later in the application.</div>
+      </div>
     </div>
     <div class="card">
       <h3>🔑 Seriti API credentials</h3>
@@ -505,6 +512,7 @@ function getConfig() {
     seritiKey: document.getElementById('seriti-key').value.trim(),
     seritiSecret: document.getElementById('seriti-secret').value.trim(),
     primary: document.getElementById('col-primary').value,
+    showVehicleSelection: document.getElementById('show-vehicle-selection').checked,
   };
 }
 
@@ -523,6 +531,7 @@ function buildSummary() {
     ['Billing type', c.billingType],
     ['Contact email', c.contactEmail],
     ['Primary colour', c.primary],
+    ['Vehicle selection page', c.showVehicleSelection ? 'Enabled' : 'Disabled'],
     ['Repo', GH_ORG + '/e-fficient-ui-' + c.key],
   ].map(([k,v]) => '<div class="summary-row"><span class="key">' + k + '</span><span class="val">' + (v||'') + '</span></div>').join('');
 }
@@ -568,6 +577,7 @@ async function startDeploy() {
         contactEmail: c.contactEmail,
         seritiKey: c.seritiKey,
         seritiSecret: c.seritiSecret,
+        showVehicleSelection: c.showVehicleSelection,
       }
     });
 
@@ -605,6 +615,7 @@ function resetAll() {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
+  document.getElementById('show-vehicle-selection').checked = false;
   document.getElementById('branch-list').innerHTML = '';
   document.getElementById('col-primary').value = '#6C3FC5';
   document.getElementById('col-primary-txt').value = '#6C3FC5';

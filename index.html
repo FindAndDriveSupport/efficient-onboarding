@@ -101,6 +101,14 @@
   .branch-row input { height: 38px; padding: 0 12px; border: 1px solid var(--gray-300); border-radius: var(--radius); font-size: 13px; color: var(--gray-900); background: white; outline: none; }
   .branch-row input:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(108,63,197,0.1); }
   .info-banner { background: var(--info-bg); border: 1px solid var(--info-border); border-radius: var(--radius); padding: 12px 14px; font-size: 13px; color: var(--info); margin-bottom: 14px; }
+  .dest-option { border: 1.5px solid var(--gray-200); border-radius: var(--radius-lg); padding: 14px 16px; margin-bottom: 10px; }
+  .dest-option.checked { border-color: var(--purple); background: #f5f0ff; }
+  .dest-option-head { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .dest-option-head input[type=checkbox] { width: 16px; height: 16px; cursor: pointer; }
+  .dest-option-title { font-size: 13px; font-weight: 600; color: var(--gray-900); }
+  .dest-option-desc { font-size: 11px; color: var(--gray-500); margin-top: 2px; }
+  .dest-fields { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--gray-200); }
+  .dest-fields.show { display: block; }
 </style>
 </head>
 <body>
@@ -117,11 +125,13 @@
     <div class="step-line"></div>
     <div class="step" id="s3v"><div class="step-dot">3</div><div class="step-label">Details</div></div>
     <div class="step-line"></div>
-    <div class="step" id="s4v"><div class="step-dot">4</div><div class="step-label">Theme</div></div>
+    <div class="step" id="s4v"><div class="step-dot">4</div><div class="step-label">Leads</div></div>
     <div class="step-line"></div>
-    <div class="step" id="s5v"><div class="step-dot">5</div><div class="step-label">Deploy</div></div>
+    <div class="step" id="s5v"><div class="step-dot">5</div><div class="step-label">Theme</div></div>
     <div class="step-line"></div>
-    <div class="step" id="s6v"><div class="step-dot">6</div><div class="step-label">Scripts</div></div>
+    <div class="step" id="s6v"><div class="step-dot">6</div><div class="step-label">Deploy</div></div>
+    <div class="step-line"></div>
+    <div class="step" id="s7v"><div class="step-dot">7</div><div class="step-label">Scripts</div></div>
   </div>
 
   <div id="statusMsg" class="status"></div>
@@ -269,8 +279,114 @@
     </div>
   </div>
 
-  <!-- Step 4: Theme -->
+  <!-- Step 4: Leads -->
   <div id="step4" style="display:none">
+    <div class="card">
+      <h3>📬 Lead sync</h3>
+      <p style="font-size:13px;color:var(--gray-500);margin-bottom:1rem;">Optional — choose where this dealer's high/low-intent leads from Seriti should be sent. Leave everything unchecked if this dealer only needs the finance widget.</p>
+      <div class="field">
+        <label>Seriti Dealership ID</label>
+        <input type="text" id="seriti-dealership-id" placeholder="Enter Seriti Dealership ID" />
+        <div class="hint">Required only if syncing leads below. Used to query Seriti's high/low-intent leads endpoints for this dealer.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🎯 Send leads to</h3>
+
+      <!-- HubSpot -->
+      <div class="dest-option" id="dest-opt-hubspot">
+        <label class="dest-option-head">
+          <input type="checkbox" id="dest-hubspot" onchange="toggleDest('hubspot')" />
+          <div>
+            <div class="dest-option-title">HubSpot</div>
+            <div class="dest-option-desc">Creates tagged contacts (High/Low Intent) in a HubSpot private app.</div>
+          </div>
+        </label>
+        <div class="dest-fields" id="dest-fields-hubspot">
+          <div class="field">
+            <label>HubSpot private app token *</label>
+            <div class="pw-wrap">
+              <input type="password" id="hubspot-token" placeholder="pat-..." />
+              <button class="pw-toggle" onclick="togglePw('hubspot-token','hubspot-token-eye')"><span id="hubspot-token-eye">Show</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VMG -->
+      <div class="dest-option" id="dest-opt-vmg">
+        <label class="dest-option-head">
+          <input type="checkbox" id="dest-vmg" onchange="toggleDest('vmg')" />
+          <div>
+            <div class="dest-option-title">VMG CRM</div>
+            <div class="dest-option-desc">Submits leads to VMG's dealership management system.</div>
+          </div>
+        </label>
+        <div class="dest-fields" id="dest-fields-vmg">
+          <div class="grid2">
+            <div class="field">
+              <label>VMG username *</label>
+              <input type="text" id="vmg-username" placeholder="Provided by VMG" />
+            </div>
+            <div class="field">
+              <label>VMG password *</label>
+              <div class="pw-wrap">
+                <input type="password" id="vmg-password" placeholder="Provided by VMG" />
+                <button class="pw-toggle" onclick="togglePw('vmg-password','vmg-password-eye')"><span id="vmg-password-eye">Show</span></button>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label>VMG dealer ID *</label>
+            <input type="text" id="vmg-dealer-id" placeholder="Unique ID per dealership, from VMG" />
+          </div>
+        </div>
+      </div>
+
+      <!-- CMS -->
+      <div class="dest-option" id="dest-opt-cms">
+        <label class="dest-option-head">
+          <input type="checkbox" id="dest-cms" onchange="toggleDest('cms')" />
+          <div>
+            <div class="dest-option-title">CMS LMS</div>
+            <div class="dest-option-desc">Injects leads via CMS's 3rd party lead injection API.</div>
+          </div>
+        </label>
+        <div class="dest-fields" id="dest-fields-cms">
+          <div class="field">
+            <label>CMS auth token *</label>
+            <div class="pw-wrap">
+              <input type="password" id="cms-token" placeholder="Provided by CMS" />
+              <button class="pw-toggle" onclick="togglePw('cms-token','cms-token-eye')"><span id="cms-token-eye">Show</span></button>
+            </div>
+          </div>
+          <div class="grid2">
+            <div class="field">
+              <label>CMS dealer ref *</label>
+              <input type="text" id="cms-dealer-ref" placeholder="e.g. 123M — from CMS" />
+            </div>
+            <div class="field">
+              <label>CMS dealer floor *</label>
+              <input type="text" id="cms-dealer-floor" placeholder="e.g. USED — from CMS" />
+            </div>
+          </div>
+          <div class="field">
+            <label>Lead source label</label>
+            <input type="text" id="cms-source" placeholder="FindAndDrive" />
+            <div class="hint">Defaults to "FindAndDrive" if left blank.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button onclick="goTo(3)">← Back</button>
+      <button class="btn-primary" onclick="validateLeads()">Continue →</button>
+    </div>
+  </div>
+
+  <!-- Step 5: Theme -->
+  <div id="step5" style="display:none">
     <div class="card">
       <h3>🎨 Theme</h3>
       <div class="field">
@@ -296,13 +412,13 @@
       </div>
     </div>
     <div class="btn-row">
-      <button onclick="goTo(3)">← Back</button>
-      <button class="btn-primary" onclick="goTo(5)">Continue →</button>
+      <button onclick="goTo(4)">← Back</button>
+      <button class="btn-primary" onclick="goTo(6)">Continue →</button>
     </div>
   </div>
 
-  <!-- Step 5: Deploy -->
-  <div id="step5" style="display:none">
+  <!-- Step 6: Deploy -->
+  <div id="step6" style="display:none">
     <div class="card">
       <h3>🚀 Ready to deploy</h3>
       <div id="deploy-summary"></div>
@@ -312,13 +428,13 @@
       <div class="progress-label" id="prog-label">Starting...</div>
     </div>
     <div class="btn-row">
-      <button onclick="goTo(4)">← Back</button>
+      <button onclick="goTo(5)">← Back</button>
       <button class="btn-primary" id="deploy-btn" onclick="startDeploy()">🚀 Deploy</button>
     </div>
   </div>
 
-  <!-- Step 6: Scripts -->
-  <div id="step6" style="display:none">
+  <!-- Step 7: Scripts -->
+  <div id="step7" style="display:none">
     <div class="card">
       <h3>✅ Deployment complete</h3>
       <p style="font-size:13px;color:var(--gray-500);margin-bottom:1rem;">Share these script tags with the dealer. They paste them before <code style="background:var(--gray-100);padding:2px 6px;border-radius:4px;">&lt;/body&gt;</code> on their website.</p>
@@ -349,6 +465,7 @@ const ORCHESTRATOR_REPO = 'onboarding-orchestrator';
 let ghToken = '';
 let setupType = 'single';
 let branchCount = 0;
+const TOTAL_STEPS = 7;
 
 function showStatus(msg, type) {
   const el = document.getElementById('statusMsg');
@@ -378,10 +495,10 @@ function selectSetup(type) {
 }
 
 function goTo(step) {
-  [1,2,3,4,5,6].forEach(i => {
+  for (let i = 1; i <= TOTAL_STEPS; i++) {
     document.getElementById('step' + i).style.display = i === step ? 'block' : 'none';
-  });
-  ['s1','s2v','s3v','s4v','s5v','s6v'].forEach((id, idx) => {
+  }
+  ['s1','s2v','s3v','s4v','s5v','s6v','s7v'].forEach((id, idx) => {
     const n = idx + 1;
     const el = document.getElementById(id);
     el.className = 'step' + (n === step ? ' active' : n < step ? ' done' : '');
@@ -400,7 +517,7 @@ function goTo(step) {
     }
   }
 
-  if (step === 5) buildSummary();
+  if (step === 6) buildSummary();
 }
 
 async function validateAuth() {
@@ -483,6 +600,74 @@ function validateDetails() {
   goTo(4);
 }
 
+// ── Lead destinations ──────────────────────────────────────────
+
+function toggleDest(type) {
+  const checked = document.getElementById('dest-' + type).checked;
+  document.getElementById('dest-fields-' + type).classList.toggle('show', checked);
+  document.getElementById('dest-opt-' + type).classList.toggle('checked', checked);
+}
+
+function getLeadDestinations() {
+  const destinations = [];
+
+  if (document.getElementById('dest-hubspot').checked) {
+    destinations.push({
+      type: 'hubspot',
+      hubspotToken: document.getElementById('hubspot-token').value.trim(),
+    });
+  }
+  if (document.getElementById('dest-vmg').checked) {
+    destinations.push({
+      type: 'vmg',
+      vmgUsername: document.getElementById('vmg-username').value.trim(),
+      vmgPassword: document.getElementById('vmg-password').value.trim(),
+      dealerId: document.getElementById('vmg-dealer-id').value.trim(),
+    });
+  }
+  if (document.getElementById('dest-cms').checked) {
+    destinations.push({
+      type: 'cms',
+      cmsToken: document.getElementById('cms-token').value.trim(),
+      dealerRef: document.getElementById('cms-dealer-ref').value.trim(),
+      dealerFloor: document.getElementById('cms-dealer-floor').value.trim(),
+      source: document.getElementById('cms-source').value.trim() || 'FindAndDrive',
+    });
+  }
+
+  return destinations;
+}
+
+function validateLeads() {
+  const destinations = getLeadDestinations();
+
+  if (destinations.length === 0) {
+    // No lead sync selected — nothing to validate, this dealer is widget-only.
+    goTo(5);
+    return;
+  }
+
+  const dealershipId = document.getElementById('seriti-dealership-id').value.trim();
+  if (!dealershipId) {
+    showStatus('Seriti Dealership ID is required when sending leads to a CRM.', 'error');
+    return;
+  }
+
+  for (const dest of destinations) {
+    if (dest.type === 'hubspot' && !dest.hubspotToken) {
+      showStatus('HubSpot private app token is required.', 'error'); return;
+    }
+    if (dest.type === 'vmg' && (!dest.vmgUsername || !dest.vmgPassword || !dest.dealerId)) {
+      showStatus('VMG username, password and dealer ID are all required.', 'error'); return;
+    }
+    if (dest.type === 'cms' && (!dest.cmsToken || !dest.dealerRef || !dest.dealerFloor)) {
+      showStatus('CMS token, dealer ref and dealer floor are all required.', 'error'); return;
+    }
+  }
+
+  goTo(5);
+}
+
 function syncCol(type) {
   document.getElementById('col-' + type + '-txt').value = document.getElementById('col-' + type).value;
   updatePreview();
@@ -511,6 +696,8 @@ function getConfig() {
     contactEmail: document.getElementById('contact-email').value.trim(),
     seritiKey: document.getElementById('seriti-key').value.trim(),
     seritiSecret: document.getElementById('seriti-secret').value.trim(),
+    seritiDealershipId: document.getElementById('seriti-dealership-id').value.trim(),
+    leadDestinations: getLeadDestinations(),
     primary: document.getElementById('col-primary').value,
     showVehicleSelection: document.getElementById('show-vehicle-selection').checked,
   };
@@ -521,6 +708,9 @@ function buildSummary() {
   const branchSummary = c.branches
     ? c.branches.map(b => b.name + ' (' + b.code + ')').join(', ')
     : c.branch;
+  const destSummary = c.leadDestinations.length
+    ? c.leadDestinations.map(d => d.type).join(', ')
+    : 'None (widget only)';
   document.getElementById('deploy-summary').innerHTML = [
     ['Dealer', c.name],
     ['Key', c.key],
@@ -530,6 +720,7 @@ function buildSummary() {
     ['Finance type', c.financeType],
     ['Billing type', c.billingType],
     ['Contact email', c.contactEmail],
+    ['Lead destinations', destSummary],
     ['Primary colour', c.primary],
     ['Vehicle selection page', c.showVehicleSelection ? 'Enabled' : 'Disabled'],
     ['Repo', GH_ORG + '/e-fficient-ui-' + c.key],
@@ -577,6 +768,8 @@ async function startDeploy() {
         contactEmail: c.contactEmail,
         seritiKey: c.seritiKey,
         seritiSecret: c.seritiSecret,
+        seritiDealershipId: c.seritiDealershipId,
+        leadDestinations: c.leadDestinations,
         showVehicleSelection: c.showVehicleSelection,
       }
     });
@@ -591,7 +784,7 @@ async function startDeploy() {
     document.getElementById('script-mode2').textContent =
       '<a href="' + workerUrl + '/?dealer=' + c.key + '&make=MAKE&model=MODEL&mm=MM_CODE"\n   target="_blank"\n   style="display:inline-block;padding:12px 24px;background:' + c.primary + ';color:#fff;border-radius:50px;font-family:sans-serif;text-decoration:none;">\n  Apply for finance\n</a>';
 
-    setTimeout(() => goTo(6), 800);
+    setTimeout(() => goTo(7), 800);
 
   } catch (err) {
     showStatus('Deploy failed: ' + err.message, 'error');
@@ -611,11 +804,21 @@ function resetAll() {
   ghToken = '';
   setupType = 'single';
   branchCount = 0;
-  ['gh-token','dealer-name','dealer-key','branch-code','allowed-domains','contact-email','seriti-key','seriti-secret'].forEach(id => {
+  [
+    'gh-token','dealer-name','dealer-key','branch-code','allowed-domains','contact-email',
+    'seriti-key','seriti-secret','seriti-dealership-id',
+    'hubspot-token','vmg-username','vmg-password','vmg-dealer-id',
+    'cms-token','cms-dealer-ref','cms-dealer-floor','cms-source',
+  ].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
   document.getElementById('show-vehicle-selection').checked = false;
+  ['hubspot','vmg','cms'].forEach(type => {
+    document.getElementById('dest-' + type).checked = false;
+    document.getElementById('dest-fields-' + type).classList.remove('show');
+    document.getElementById('dest-opt-' + type).classList.remove('checked');
+  });
   document.getElementById('branch-list').innerHTML = '';
   document.getElementById('col-primary').value = '#6C3FC5';
   document.getElementById('col-primary-txt').value = '#6C3FC5';

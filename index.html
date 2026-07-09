@@ -209,6 +209,12 @@
         </div>
       </div>
 
+      <div class="field">
+        <label>Dealer group <span style="font-weight:400;color:var(--gray-400)">(optional)</span></label>
+        <input type="text" id="dealer-group" placeholder="e.g. north-western" />
+        <div class="hint">Links this dealer to others under the same ownership group — used for group-level billing, analytics rollups, and lead attribution. Leave blank for a standalone dealer. Use the same value across each onboarding run for a "multiple websites, multiple branches" group.</div>
+      </div>
+
       <!-- Multi-branch section -->
       <div id="multi-branch-section" style="display:none">
         <div class="field">
@@ -690,6 +696,7 @@ function getConfig() {
     branch: isMulti ? (branches?.[0]?.code || '') : document.getElementById('branch-code').value.trim(),
     branches: branches,
     setupType: setupType,
+    groupKey: document.getElementById('dealer-group').value.trim(),
     domains: document.getElementById('allowed-domains').value.split(',').map(d => d.trim()).filter(Boolean),
     financeType: document.getElementById('finance-type').value,
     billingType: document.getElementById('billing-type').value,
@@ -714,6 +721,7 @@ function buildSummary() {
   document.getElementById('deploy-summary').innerHTML = [
     ['Dealer', c.name],
     ['Key', c.key],
+    ['Group', c.groupKey || 'None (standalone)'],
     ['Setup', c.setupType === 'multi-branch' ? 'Single website, multiple branches' : c.setupType === 'multi-site' ? 'Multiple websites, multiple branches' : 'Single website, single branch'],
     ['Branches', branchSummary],
     ['Domains', c.domains.join(', ')],
@@ -761,6 +769,7 @@ async function startDeploy() {
         branch: c.branch,
         branches: c.branches,
         setupType: c.setupType,
+        groupKey: c.groupKey,
         domains: c.domains,
         primary: c.primary,
         financeType: c.financeType,
@@ -805,7 +814,7 @@ function resetAll() {
   setupType = 'single';
   branchCount = 0;
   [
-    'gh-token','dealer-name','dealer-key','branch-code','allowed-domains','contact-email',
+    'gh-token','dealer-name','dealer-key','dealer-group','branch-code','allowed-domains','contact-email',
     'seriti-key','seriti-secret','seriti-dealership-id',
     'hubspot-token','vmg-username','vmg-password','vmg-dealer-id',
     'cms-token','cms-dealer-ref','cms-dealer-floor','cms-source',

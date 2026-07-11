@@ -332,17 +332,18 @@
         <div class="dest-fields" id="dest-fields-vmg">
           <div class="grid2">
             <div class="field">
-              <label>VMG username *</label>
-              <input type="text" id="vmg-username" placeholder="Provided by VMG" />
+              <label>VMG username <span style="font-weight:400;color:var(--gray-400)">(optional)</span></label>
+              <input type="text" id="vmg-username" placeholder="Leave blank to use the shared account" />
             </div>
             <div class="field">
-              <label>VMG password *</label>
+              <label>VMG password <span style="font-weight:400;color:var(--gray-400)">(optional)</span></label>
               <div class="pw-wrap">
-                <input type="password" id="vmg-password" placeholder="Provided by VMG" />
+                <input type="password" id="vmg-password" placeholder="Leave blank to use the shared account" />
                 <button class="pw-toggle" onclick="togglePw('vmg-password','vmg-password-eye')"><span id="vmg-password-eye">Show</span></button>
               </div>
             </div>
           </div>
+          <div class="hint" style="margin-top:-8px;margin-bottom:14px;">Only needed if this dealer uses its own separate VMG account.</div>
           <div class="field">
             <label>VMG dealer ID *</label>
             <input type="text" id="vmg-dealer-id" placeholder="Unique ID per dealership, from VMG" />
@@ -361,11 +362,12 @@
         </label>
         <div class="dest-fields" id="dest-fields-cms">
           <div class="field">
-            <label>CMS auth token *</label>
+            <label>CMS auth token <span style="font-weight:400;color:var(--gray-400)">(optional)</span></label>
             <div class="pw-wrap">
-              <input type="password" id="cms-token" placeholder="Provided by CMS" />
+              <input type="password" id="cms-token" placeholder="Leave blank to use the shared FindAndDrive CMS account" />
               <button class="pw-toggle" onclick="togglePw('cms-token','cms-token-eye')"><span id="cms-token-eye">Show</span></button>
             </div>
+            <div class="hint">Only needed if this dealer uses its own separate CMS account.</div>
           </div>
           <div class="grid2">
             <div class="field">
@@ -663,11 +665,11 @@ function validateLeads() {
     if (dest.type === 'hubspot' && !dest.hubspotToken) {
       showStatus('HubSpot private app token is required.', 'error'); return;
     }
-    if (dest.type === 'vmg' && (!dest.vmgUsername || !dest.vmgPassword || !dest.dealerId)) {
-      showStatus('VMG username, password and dealer ID are all required.', 'error'); return;
+    if (dest.type === 'vmg' && !dest.dealerId) {
+      showStatus('VMG dealer ID is required.', 'error'); return;
     }
-    if (dest.type === 'cms' && (!dest.cmsToken || !dest.dealerRef || !dest.dealerFloor)) {
-      showStatus('CMS token, dealer ref and dealer floor are all required.', 'error'); return;
+    if (dest.type === 'cms' && (!dest.dealerRef || !dest.dealerFloor)) {
+      showStatus('CMS dealer ref and dealer floor are required.', 'error'); return;
     }
   }
 

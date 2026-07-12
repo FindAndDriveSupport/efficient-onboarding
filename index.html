@@ -109,6 +109,12 @@
   .dest-option-desc { font-size: 11px; color: var(--gray-500); margin-top: 2px; }
   .dest-fields { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--gray-200); }
   .dest-fields.show { display: block; }
+  .checkbox-field { display: flex; align-items: flex-start; gap: 8px; font-weight: 400; cursor: pointer; padding: 12px 14px; border: 1.5px solid var(--gray-200); border-radius: var(--radius-lg); }
+  .checkbox-field:hover { border-color: var(--purple); background: var(--gray-50); }
+  .checkbox-field input[type=checkbox] { width: 16px; height: 16px; margin-top: 1px; cursor: pointer; flex-shrink: 0; }
+  .checkbox-field-text { font-size: 13px; }
+  .checkbox-field-title { font-weight: 600; color: var(--gray-900); margin-bottom: 2px; }
+  .checkbox-field-desc { font-size: 11px; color: var(--gray-500); }
 </style>
 </head>
 <body>
@@ -211,8 +217,14 @@
 
       <div class="field">
         <label>Dealer group <span style="font-weight:400;color:var(--gray-400)">(optional)</span></label>
-        <input type="text" id="dealer-group" placeholder="e.g. north-western" />
+        <input type="text" id="dealer-group" placeholder="e.g. north-western" oninput="toggleGroupName()" />
         <div class="hint">Links this dealer to others under the same ownership group — used for group-level billing, analytics rollups, and lead attribution. Leave blank for a standalone dealer. Use the same value across each onboarding run for a "multiple websites, multiple branches" group.</div>
+      </div>
+
+      <div class="field" id="group-name-field" style="display:none">
+        <label>Group display name</label>
+        <input type="text" id="dealer-group-name" placeholder="e.g. North Western Motor Group" />
+        <div class="hint">Shown to group admins in the analytics dashboard when switching between branches. Only needed the first time you onboard a dealer in this group — leave blank on subsequent branches, the existing name is kept.</div>
       </div>
 
       <!-- Multi-branch section -->
@@ -258,6 +270,16 @@
           Show vehicle selection page
         </label>
         <div class="hint">Adds a step before the application form where users pick a vehicle make and model. Pre-fills these fields later in the application.</div>
+      </div>
+
+      <div class="field">
+        <label class="checkbox-field">
+          <input type="checkbox" id="has-website" />
+          <div class="checkbox-field-text">
+            <div class="checkbox-field-title">🌐 We're building & hosting this dealer's website</div>
+            <div class="checkbox-field-desc">Separate from the finance widget above — check this only if FindAndDrive is also provisioning a full dealer website. Enables the Stock management section for this dealer in the analytics dashboard.</div>
+          </div>
+        </label>
       </div>
     </div>
     <div class="card">
@@ -502,6 +524,11 @@ function selectSetup(type) {
   document.getElementById('multi-site-banner').style.display = type === 'multi-site' ? 'block' : 'none';
 }
 
+function toggleGroupName() {
+  const hasGroup = document.getElementById('dealer-group').value.trim().length > 0;
+  document.getElementById('group-name-field').style.display = hasGroup ? 'block' : 'none';
+}
+
 function goTo(step) {
   for (let i = 1; i <= TOTAL_STEPS; i++) {
     document.getElementById('step' + i).style.display = i === step ? 'block' : 'none';
@@ -699,6 +726,8 @@ function getConfig() {
     branches: branches,
     setupType: setupType,
     groupKey: document.getElementById('dealer-group').value.trim(),
+    groupName: document.getElementById('dealer-group-name').value.trim(),
+    hasWebsite: document.getElementById('has-website').checked,
     domains: document.getElementById('allowed-domains').value.split(',').map(d => d.trim()).filter(Boolean),
     financeType: document.getElementById('finance-type').value,
     billingType: document.getElementById('billing-type').value,
@@ -723,7 +752,7 @@ function buildSummary() {
   document.getElementById('deploy-summary').innerHTML = [
     ['Dealer', c.name],
     ['Key', c.key],
-    ['Group', c.groupKey || 'None (standalone)'],
+    ['Group', c.groupKey ? (c.groupName || c.groupKey) : 'None (standalone)'],
     ['Setup', c.setupType === 'multi-branch' ? 'Single website, multiple branches' : c.setupType === 'multi-site' ? 'Multiple websites, multiple branches' : 'Single website, single branch'],
     ['Branches', branchSummary],
     ['Domains', c.domains.join(', ')],
@@ -733,6 +762,7 @@ function buildSummary() {
     ['Lead destinations', destSummary],
     ['Primary colour', c.primary],
     ['Vehicle selection page', c.showVehicleSelection ? 'Enabled' : 'Disabled'],
+    ['Website hosting', c.hasWebsite ? 'Yes — Stock section will be enabled' : 'No (widget only)'],
     ['Repo', GH_ORG + '/e-fficient-ui-' + c.key],
   ].map(([k,v]) => '<div class="summary-row"><span class="key">' + k + '</span><span class="val">' + (v||'') + '</span></div>').join('');
 }
@@ -772,6 +802,8 @@ async function startDeploy() {
         branches: c.branches,
         setupType: c.setupType,
         groupKey: c.groupKey,
+        groupName: c.groupName,
+        hasWebsite: c.hasWebsite,
         domains: c.domains,
         primary: c.primary,
         financeType: c.financeType,
@@ -816,7 +848,7 @@ function resetAll() {
   setupType = 'single';
   branchCount = 0;
   [
-    'gh-token','dealer-name','dealer-key','dealer-group','branch-code','allowed-domains','contact-email',
+    'gh-token','dealer-name','dealer-key','dealer-group','dealer-group-name','branch-code','allowed-domains','contact-email',
     'seriti-key','seriti-secret','seriti-dealership-id',
     'hubspot-token','vmg-username','vmg-password','vmg-dealer-id',
     'cms-token','cms-dealer-ref','cms-dealer-floor','cms-source',
@@ -825,6 +857,8 @@ function resetAll() {
     if (el) el.value = '';
   });
   document.getElementById('show-vehicle-selection').checked = false;
+  document.getElementById('has-website').checked = false;
+  document.getElementById('group-name-field').style.display = 'none';
   ['hubspot','vmg','cms'].forEach(type => {
     document.getElementById('dest-' + type).checked = false;
     document.getElementById('dest-fields-' + type).classList.remove('show');

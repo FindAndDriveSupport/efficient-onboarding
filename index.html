@@ -152,11 +152,23 @@
           <input type="password" id="gh-token" placeholder="github_pat_..." />
           <button class="pw-toggle" onclick="togglePw('gh-token','gh-eye')"><span id="gh-eye">Show</span></button>
         </div>
-        <div class="hint">Needs repo + workflow + admin:org scopes. Session only — never stored.</div>
+        <div class="hint">Needs repo + workflow + admin:org scopes.</div>
+      </div>
+      <div class="field">
+        <label class="checkbox-field" style="padding:10px 14px;">
+          <input type="checkbox" id="remember-token" checked />
+          <div class="checkbox-field-text">
+            <div class="checkbox-field-title" style="font-size:13px;">Remember this token on this device</div>
+            <div class="checkbox-field-desc">Stored locally in this browser only — never sent anywhere except GitHub. Uncheck to require re-entry every session.</div>
+          </div>
+        </label>
       </div>
     </div>
     <div class="btn-row">
       <button class="btn-primary" onclick="validateAuth()">Continue →</button>
+    </div>
+    <div style="text-align:right;margin-top:8px;">
+      <button onclick="clearSavedToken()" style="font-size:12px;padding:4px 10px;color:var(--gray-400);border:none;background:none;">Clear saved token</button>
     </div>
   </div>
 
@@ -217,7 +229,7 @@
 
       <div class="field">
         <label>Dealer group <span style="font-weight:400;color:var(--gray-400)">(optional)</span></label>
-        <input type="text" id="dealer-group" placeholder="e.g. north-western" oninput="toggleGroupName()" />
+        <input type="text" id="dealer-group" placeholder="e.g. north-western" oninput="toggleGroupName(); checkGroupCreds();" />
         <div class="hint">Links this dealer to others under the same ownership group — used for group-level billing, analytics rollups, and lead attribution. Leave blank for a standalone dealer. Use the same value across each onboarding run for a "multiple websites, multiple branches" group.</div>
       </div>
 
@@ -225,6 +237,13 @@
         <label>Group display name</label>
         <input type="text" id="dealer-group-name" placeholder="e.g. North Western Motor Group" />
         <div class="hint">Shown to group admins in the analytics dashboard when switching between branches. Only needed the first time you onboard a dealer in this group — leave blank on subsequent branches, the existing name is kept.</div>
+      </div>
+
+      <div id="group-creds-banner" style="display:none;">
+        <div class="info-banner" style="background:#f0fdf4;border-color:#86efac;color:#16a34a;">
+          🔒 <span id="group-creds-text"></span>
+          <button type="button" onclick="clearGroupCreds()" style="margin-left:8px;font-size:11px;padding:2px 8px;color:#16a34a;border-color:#86efac;">Use different credentials</button>
+        </div>
       </div>
 
       <!-- Multi-branch section -->
@@ -287,18 +306,18 @@
       <div class="field">
         <label>Seriti API key *</label>
         <div class="pw-wrap">
-          <input type="password" id="seriti-key" placeholder="Enter Seriti API key" />
+          <input type="password" id="seriti-key" placeholder="Enter Seriti API key" oninput="markCredsEdited()" />
           <button class="pw-toggle" onclick="togglePw('seriti-key','seriti-key-eye')"><span id="seriti-key-eye">Show</span></button>
         </div>
-        <div class="hint">Unique per dealer — stored securely in Cloudflare KV.</div>
+        <div class="hint">Unique per dealer group — stored securely in Cloudflare KV. Auto-filled for other branches in the same group.</div>
       </div>
       <div class="field">
         <label>Seriti API secret *</label>
         <div class="pw-wrap">
-          <input type="password" id="seriti-secret" placeholder="Enter Seriti API secret" />
+          <input type="password" id="seriti-secret" placeholder="Enter Seriti API secret" oninput="markCredsEdited()" />
           <button class="pw-toggle" onclick="togglePw('seriti-secret','seriti-secret-eye')"><span id="seriti-secret-eye">Show</span></button>
         </div>
-        <div class="hint">Unique per dealer — stored securely in Cloudflare KV.</div>
+        <div class="hint">Unique per dealer group — stored securely in Cloudflare KV. Auto-filled for other branches in the same group.</div>
       </div>
     </div>
     <div class="btn-row">
@@ -480,7 +499,8 @@
       </div>
     </div>
     <div class="btn-row">
-      <button class="btn-primary" onclick="resetAll()">+ Onboard another dealer</button>
+      <button onclick="onboardAnotherBranch()">+ Add another branch (same group)</button>
+      <button class="btn-primary" onclick="resetAll()">+ Onboard a different dealer</button>
     </div>
   </div>
 </div>
@@ -495,7 +515,82 @@ const ORCHESTRATOR_REPO = 'onboarding-orchestrator';
 let ghToken = '';
 let setupType = 'single';
 let branchCount = 0;
+let credsAutoFilled = false;
 const TOTAL_STEPS = 7;
+const LS_TOKEN_KEY = 'eff_onboard_gh_token';
+const LS_GROUP_CREDS_PREFIX = 'eff_onboard_group_creds:';
+
+// ── Persistence helpers ──────────────────────────────────────────────────────
+
+function saveToken(token) {
+  try { localStorage.setItem(LS_TOKEN_KEY, token); } catch {}
+}
+function loadSavedToken() {
+  try { return localStorage.getItem(LS_TOKEN_KEY) || ''; } catch { return ''; }
+}
+function clearSavedToken() {
+  try { localStorage.removeItem(LS_TOKEN_KEY); } catch {}
+  document.getElementById('gh-token').value = '';
+  showStatus('Saved token cleared.', 'info');
+}
+
+function saveGroupCreds(groupKey, seritiKey, seritiSecret) {
+  if (!groupKey) return;
+  try {
+    localStorage.setItem(LS_GROUP_CREDS_PREFIX + groupKey, JSON.stringify({ seritiKey, seritiSecret }));
+  } catch {}
+}
+function loadGroupCreds(groupKey) {
+  if (!groupKey) return null;
+  try {
+    const raw = localStorage.getItem(LS_GROUP_CREDS_PREFIX + groupKey);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+function clearGroupCredsStorage(groupKey) {
+  try { localStorage.removeItem(LS_GROUP_CREDS_PREFIX + groupKey); } catch {}
+}
+
+// Auto-fill Seriti credentials when a known group key is entered
+function checkGroupCreds() {
+  const groupKey = document.getElementById('dealer-group').value.trim();
+  const banner = document.getElementById('group-creds-banner');
+  const bannerText = document.getElementById('group-creds-text');
+
+  if (!groupKey) {
+    banner.style.display = 'none';
+    return;
+  }
+
+  const saved = loadGroupCreds(groupKey);
+  if (saved && saved.seritiKey) {
+    document.getElementById('seriti-key').value = saved.seritiKey;
+    document.getElementById('seriti-secret').value = saved.seritiSecret;
+    bannerText.textContent = `Using saved Seriti credentials for group "${groupKey}"`;
+    banner.style.display = 'block';
+    credsAutoFilled = true;
+  } else {
+    banner.style.display = 'none';
+    credsAutoFilled = false;
+  }
+}
+
+function clearGroupCreds() {
+  const groupKey = document.getElementById('dealer-group').value.trim();
+  clearGroupCredsStorage(groupKey);
+  document.getElementById('seriti-key').value = '';
+  document.getElementById('seriti-secret').value = '';
+  document.getElementById('group-creds-banner').style.display = 'none';
+  credsAutoFilled = false;
+}
+
+function markCredsEdited() {
+  // If the user manually types into the Seriti fields, stop showing the "using saved" banner
+  if (credsAutoFilled) {
+    document.getElementById('group-creds-banner').style.display = 'none';
+    credsAutoFilled = false;
+  }
+}
 
 function showStatus(msg, type) {
   const el = document.getElementById('statusMsg');
@@ -566,6 +661,12 @@ async function validateAuth() {
     if (!res.ok) throw new Error('Invalid GitHub token');
     const user = await res.json();
     ghToken = gh;
+    if (document.getElementById('remember-token').checked) {
+      saveToken(gh);
+    } else {
+      clearSavedToken();
+      ghToken = gh; // clearSavedToken also blanks the input; restore in-memory token
+    }
     showStatus('Authenticated as ' + user.login, 'success');
     setTimeout(() => goTo(2), 800);
   } catch (e) { showStatus('GitHub token invalid: ' + e.message, 'error'); }
@@ -630,6 +731,13 @@ function validateDetails() {
   } else {
     const branch = document.getElementById('branch-code').value.trim();
     if (!branch) { showStatus('Branch code is required.', 'error'); return; }
+  }
+
+  // Remember Seriti credentials for this group so re-onboarding another
+  // branch under the same group auto-fills them next time.
+  const groupKey = document.getElementById('dealer-group').value.trim();
+  if (groupKey) {
+    saveGroupCreds(groupKey, seritiKey, seritiSecret);
   }
 
   goTo(4);
@@ -847,8 +955,25 @@ function copyText(srcId, btnId) {
   setTimeout(() => btn.textContent = 'Copy', 2000);
 }
 
-function resetAll() {
-  ghToken = '';
+// Keeps group, Seriti credentials, theme, contact, billing, finance type —
+// only clears the branch-specific fields (name, key, branch code/list, domains).
+function onboardAnotherBranch() {
+  ['dealer-name', 'dealer-key', 'branch-code', 'allowed-domains'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('branch-list').innerHTML = '';
+  branchCount = 0;
+
+  document.getElementById('progress-wrap').classList.remove('show');
+  document.getElementById('deploy-btn').disabled = false;
+
+  goTo(3);
+  checkGroupCreds();
+  showStatus('Group and Seriti credentials kept — just fill in this branch\'s details.', 'info');
+}
+
+function resetAll() {  ghToken = '';
   setupType = 'single';
   branchCount = 0;
   [
@@ -876,6 +1001,14 @@ function resetAll() {
   selectSetup('single');
   goTo(1);
 }
+
+// ── Init — prefill saved GitHub token on page load ───────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = loadSavedToken();
+  if (saved) {
+    document.getElementById('gh-token').value = saved;
+  }
+});
 </script>
 </body>
 </html>

@@ -410,21 +410,44 @@
             </div>
             <div class="hint">Only needed if this dealer uses its own separate CMS account.</div>
           </div>
+          <div class="field">
+            <label>CMS dealer ref *</label>
+            <input type="text" id="cms-dealer-ref" placeholder="e.g. 123M — from CMS" />
+          </div>
           <div class="grid2">
             <div class="field">
-              <label>CMS dealer ref *</label>
-              <input type="text" id="cms-dealer-ref" placeholder="e.g. 123M — from CMS" />
+              <label>CMS floor — New <span style="font-weight:400;color:var(--gray-400)">(optional)</span></label>
+              <input type="text" id="cms-dealer-floor-new" placeholder="e.g. NEW — from CMS" />
             </div>
             <div class="field">
-              <label>CMS dealer floor *</label>
-              <input type="text" id="cms-dealer-floor" placeholder="e.g. USED — from CMS" />
+              <label>CMS floor — Used <span style="font-weight:400;color:var(--gray-400)">(optional)</span></label>
+              <input type="text" id="cms-dealer-floor-used" placeholder="e.g. USED — from CMS" />
             </div>
           </div>
+          <div class="hint" style="margin-top:-8px;margin-bottom:14px;">Leave blank until the application form captures new/used — leads will route to CMS without a floor code until then.</div>
           <div class="field">
             <label>Lead source label</label>
             <input type="text" id="cms-source" placeholder="seriti-e-fficient" />
             <div class="hint">Defaults to "seriti-e-fficient" if left blank.</div>
           </div>
+        </div>
+      </div>
+
+      <!-- Email digest -->
+      <div class="dest-option" id="dest-opt-email">
+        <label class="dest-option-head">
+          <input type="checkbox" id="dest-email" onchange="toggleDest('email')" />
+          <div>
+            <div class="dest-option-title">Email digest</div>
+            <div class="dest-option-desc">Sends a secure link twice daily (8am & 2pm SAST) to view/download new leads — instead of pushing to a CRM.</div>
+          </div>
+        </label>
+        <div class="dest-fields" id="dest-fields-email">
+          <div class="field">
+            <label>Recipient email *</label>
+            <input type="email" id="email-recipient" placeholder="branch@dealer.co.za" />
+          </div>
+          <div class="hint" style="margin-top:-8px;margin-bottom:14px;">Recipients get an email with a link — opening it asks for this dealer's branch code before showing the leads.</div>
         </div>
       </div>
     </div>
@@ -773,8 +796,15 @@ function getLeadDestinations() {
       type: 'cms',
       cmsToken: document.getElementById('cms-token').value.trim(),
       dealerRef: document.getElementById('cms-dealer-ref').value.trim(),
-      dealerFloor: document.getElementById('cms-dealer-floor').value.trim(),
+      dealerFloorNew: document.getElementById('cms-dealer-floor-new').value.trim(),
+      dealerFloorUsed: document.getElementById('cms-dealer-floor-used').value.trim(),
       source: document.getElementById('cms-source').value.trim() || 'seriti-e-fficient',
+    });
+  }
+  if (document.getElementById('dest-email').checked) {
+    destinations.push({
+      type: 'email',
+      recipientEmail: document.getElementById('email-recipient').value.trim(),
     });
   }
 
@@ -803,8 +833,11 @@ function validateLeads() {
     if (dest.type === 'vmg' && !dest.dealerId) {
       showStatus('VMG dealer ID is required.', 'error'); return;
     }
-    if (dest.type === 'cms' && (!dest.dealerRef || !dest.dealerFloor)) {
-      showStatus('CMS dealer ref and dealer floor are required.', 'error'); return;
+    if (dest.type === 'cms' && !dest.dealerRef) {
+      showStatus('CMS dealer ref is required.', 'error'); return;
+    }
+    if (dest.type === 'email' && !dest.recipientEmail) {
+      showStatus('Recipient email is required for the email digest.', 'error'); return;
     }
   }
 
@@ -980,7 +1013,8 @@ function resetAll() {  ghToken = '';
     'gh-token','dealer-name','dealer-key','dealer-group','dealer-group-name','branch-code','allowed-domains','contact-email',
     'seriti-key','seriti-secret','seriti-dealership-id',
     'hubspot-token','vmg-username','vmg-password','vmg-dealer-id',
-    'cms-token','cms-dealer-ref','cms-dealer-floor','cms-source',
+    'cms-token','cms-dealer-ref','cms-dealer-floor-new','cms-dealer-floor-used','cms-source',
+    'email-recipient',
   ].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
@@ -988,7 +1022,7 @@ function resetAll() {  ghToken = '';
   document.getElementById('show-vehicle-selection').checked = false;
   document.getElementById('has-website').checked = false;
   document.getElementById('group-name-field').style.display = 'none';
-  ['hubspot','vmg','cms'].forEach(type => {
+  ['hubspot','vmg','cms','email'].forEach(type => {
     document.getElementById('dest-' + type).checked = false;
     document.getElementById('dest-fields-' + type).classList.remove('show');
     document.getElementById('dest-opt-' + type).classList.remove('checked');

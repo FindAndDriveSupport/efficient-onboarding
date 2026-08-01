@@ -433,6 +433,60 @@
         </div>
       </div>
 
+      <!-- DealerOS -->
+      <div class="dest-option" id="dest-opt-dealeros">
+        <label class="dest-option-head">
+          <input type="checkbox" id="dest-dealeros" onchange="toggleDest('dealeros')" />
+          <div>
+            <div class="dest-option-title">DealerOS</div>
+            <div class="dest-option-desc">Creates a lead via DealerOS's Integration API (api/lead/create).</div>
+          </div>
+        </label>
+        <div class="dest-fields" id="dest-fields-dealeros">
+          <div class="field">
+            <label>DealerOS API token *</label>
+            <div class="pw-wrap">
+              <input type="password" id="dealeros-token" placeholder="Bearer token" />
+              <button class="pw-toggle" onclick="togglePw('dealeros-token','dealeros-token-eye')"><span id="dealeros-token-eye">Show</span></button>
+            </div>
+            <div class="hint">Unique per dealer — request from DealerOS.</div>
+          </div>
+          <div class="field">
+            <label>DealerOS dealership ID *</label>
+            <input type="text" id="dealeros-dealership-id" placeholder="e.g. 2" />
+            <div class="hint">Must match an existing dealership ID in DealerOS.</div>
+          </div>
+          <div class="grid2">
+            <div class="field">
+              <label>Lead source</label>
+              <select id="dealeros-lead-source">
+                <option value="DEALER_WEBSITE_ORGANIC">Dealer website (organic)</option>
+                <option value="DEALER_WEBSITE_CALL">Dealer website (call)</option>
+                <option value="DIGITAL_MARKETING">Digital marketing</option>
+                <option value="GOOGLE">Google</option>
+                <option value="GOOGLE_SEARCH">Google search</option>
+                <option value="GOOGLE_DISPLAY">Google display</option>
+                <option value="FACEBOOK">Facebook</option>
+                <option value="INSTAGRAM">Instagram</option>
+                <option value="MANUALLY_ADDED">Manually added</option>
+              </select>
+              <div class="hint">Must match a DealerOS lead.source enum value.</div>
+            </div>
+            <div class="field">
+              <label>Enquiry method</label>
+              <select id="dealeros-enquiry-method">
+                <option value="WEBSITE">Website</option>
+                <option value="PHONE_CALL">Phone call</option>
+                <option value="WHATSAPP">WhatsApp</option>
+                <option value="VIA_EMAIL">Email</option>
+                <option value="IN_PERSON">In person</option>
+                <option value="SOCIAL_MEDIA">Social media</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Email digest -->
       <div class="dest-option" id="dest-opt-email">
         <label class="dest-option-head">
@@ -801,6 +855,15 @@ function getLeadDestinations() {
       source: document.getElementById('cms-source').value.trim() || 'seriti-e-fficient',
     });
   }
+  if (document.getElementById('dest-dealeros').checked) {
+    destinations.push({
+      type: 'dealeros',
+      dealerosToken: document.getElementById('dealeros-token').value.trim(),
+      dealershipId: document.getElementById('dealeros-dealership-id').value.trim(),
+      leadSource: document.getElementById('dealeros-lead-source').value || 'DEALER_WEBSITE_ORGANIC',
+      enquiryMethod: document.getElementById('dealeros-enquiry-method').value || 'WEBSITE',
+    });
+  }
   if (document.getElementById('dest-email').checked) {
     destinations.push({
       type: 'email',
@@ -835,6 +898,9 @@ function validateLeads() {
     }
     if (dest.type === 'cms' && !dest.dealerRef) {
       showStatus('CMS dealer ref is required.', 'error'); return;
+    }
+    if (dest.type === 'dealeros' && (!dest.dealerosToken || !dest.dealershipId)) {
+      showStatus('DealerOS API token and dealership ID are required.', 'error'); return;
     }
     if (dest.type === 'email' && !dest.recipientEmail) {
       showStatus('Recipient email is required for the email digest.', 'error'); return;
@@ -1014,6 +1080,7 @@ function resetAll() {  ghToken = '';
     'seriti-key','seriti-secret','seriti-dealership-id',
     'hubspot-token','vmg-username','vmg-password','vmg-dealer-id',
     'cms-token','cms-dealer-ref','cms-dealer-floor-new','cms-dealer-floor-used','cms-source',
+    'dealeros-token','dealeros-dealership-id',
     'email-recipient',
   ].forEach(id => {
     const el = document.getElementById(id);
@@ -1022,7 +1089,7 @@ function resetAll() {  ghToken = '';
   document.getElementById('show-vehicle-selection').checked = false;
   document.getElementById('has-website').checked = false;
   document.getElementById('group-name-field').style.display = 'none';
-  ['hubspot','vmg','cms','email'].forEach(type => {
+  ['hubspot','vmg','cms','dealeros','email'].forEach(type => {
     document.getElementById('dest-' + type).checked = false;
     document.getElementById('dest-fields-' + type).classList.remove('show');
     document.getElementById('dest-opt-' + type).classList.remove('checked');
